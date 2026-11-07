@@ -471,7 +471,7 @@ function startPractice() {
   input = idleInput();
   lastHp = [100, 100];
   lastSkills = [0, 0];
-  document.body.classList.remove("console-home");
+  document.body.classList.remove("console-home", "in-room");
   document.body.classList.add("fighting");
   renderFight();
   world?.fight(local, 0);
@@ -492,7 +492,7 @@ function renderRoom() {
     const index = r.bout?.fighters.findIndex((f) => f.id === myId) ?? -1;
     view = index >= 0 ? index : view;
     const watching = index < 0;
-    document.body.classList.remove("console-home");
+    document.body.classList.remove("console-home", "in-room");
     document.body.classList.add("fighting");
     if (!$("#hud") || fingerprint !== `playing-${r.round}-${watching}`) {
       renderFight(watching);

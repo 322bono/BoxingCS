@@ -106,6 +106,8 @@ test("two real browsers join by invite and start the same match", async ({
     await p.getByRole("button", { name: "경기 시작", exact: true }).click();
     await expect(p.locator("#hud")).toBeVisible();
     await expect(q.locator("#hud")).toBeVisible();
+    await expect(p.locator("#world")).toHaveCSS("opacity", "1");
+    await expect(q.locator("#world")).toHaveCSS("opacity", "1");
     await q.reload({ waitUntil: "domcontentloaded" });
     await expect(q.locator("#hud")).toBeVisible();
     await expect(q.locator("#name-0")).toContainText("BLUE");
