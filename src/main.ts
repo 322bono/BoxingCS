@@ -78,21 +78,43 @@ const settings = {
   music: localStorage.getItem("ring-music") !== "off",
   shake: localStorage.getItem("ring-shake") !== "off",
 };
+document.body.classList.add("booting");
 $("#app").innerHTML =
-  `<div id="world"></div><div id="flash"></div><header class="site-header"><a class="brand" href="/" aria-label="RING CLUB 홈"><span class="brand-mark">R<span>↗</span></span><span>RING<span class="brand-club">CLUB</span><small>THE FRIENDS FIGHT CLUB</small></span></a><nav aria-label="메인 메뉴"><button class="nav-active" data-home>플레이 <span>01</span></button><button data-roster>파이터 <span>02</span></button><button data-help>플레이 가이드 <span>03</span></button></nav><div class="header-right"><span class="server-status"><i></i><span id="server-text">연결 중</span></span><button class="icon-button" data-settings aria-label="설정">⚙</button></div></header><main id="ui"></main><div id="modal-root"></div><div id="toast" role="status" aria-live="polite"></div>`;
+  `<div id="world"></div><div id="flash"></div><header class="site-header"><a class="brand" href="/" aria-label="RING CLUB 홈"><span class="brand-mark">R<span>↗</span></span><span>RING<span class="brand-club">CLUB</span><small>THE FRIENDS FIGHT CLUB</small></span></a><nav aria-label="메인 메뉴"><button class="nav-active" data-home>플레이 <span>01</span></button><button data-roster>파이터 <span>02</span></button><button data-help>플레이 가이드 <span>03</span></button></nav><div class="header-right"><span class="server-status"><i></i><span id="server-text">연결 중</span></span><button class="icon-button" data-settings aria-label="설정">⚙</button></div></header><main id="ui"><p class="boot-message" role="status">링을 준비하고 있습니다…</p></main><div id="modal-root"></div><div id="toast" role="status" aria-live="polite"></div>`;
 const gameAudio = new GameAudio(settings);
 let world: World | null = null;
-try {
-  world = new World($("#world"), () =>
-    toast("3D 화면을 복구하려면 페이지를 새로고침해 주세요."),
-  );
-  world.shake = settings.shake;
-} catch {
-  toast(
-    "WebGL을 시작하지 못했습니다. 브라우저의 하드웨어 가속을 켜고 다시 열어 주세요.",
-  );
-  $("#world").innerHTML =
-    '<p class="webgl-error">3D 렌더러를 시작하지 못했습니다.<br>하드웨어 가속을 확인해 주세요.</p>';
+let worldBootComplete = false;
+let worldBootScheduled = false;
+function initializeWorld() {
+  if (worldBootComplete) return;
+  try {
+    world = new World($("#world"), () =>
+      toast("3D 화면을 복구하려면 페이지를 새로고침해 주세요."),
+    );
+    world.shake = settings.shake;
+  } catch {
+    toast(
+      "WebGL을 시작하지 못했습니다. 브라우저의 하드웨어 가속을 켜고 다시 열어 주세요.",
+    );
+    $("#world").innerHTML =
+      '<p class="webgl-error">3D 렌더러를 시작하지 못했습니다.<br>하드웨어 가속을 확인해 주세요.</p>';
+  }
+  worldBootComplete = true;
+  document.body.classList.remove("booting");
+  if (room) {
+    fingerprint = "";
+    renderRoom();
+  } else if (local) world?.fight(local, 0);
+  else renderHome();
+}
+// Offline practice still boots when the server is unavailable.
+const offlineWorldTimer = setTimeout(initializeWorld, 5000);
+function scheduleWorld() {
+  if (worldBootComplete || worldBootScheduled) return;
+  worldBootScheduled = true;
+  clearTimeout(offlineWorldTimer);
+  // Restore the server session and paint its state before touching WebGL.
+  requestAnimationFrame(() => setTimeout(initializeWorld, 0));
 }
 const socket = io({ auth: { token }, reconnection: true });
 socket.on("connect", () => {
@@ -116,6 +138,7 @@ socket.on("identity", (id: string) => {
   myId = id;
 });
 socket.on("room", (r: PublicRoom | null) => {
+  scheduleWorld();
   if (!r && !room && local) return; // An online reconnect must not cancel local training.
   const old = room?.phase;
   room = r;
@@ -198,6 +221,7 @@ function selectionPortrait(o: CharacterId, e: string) {
 }
 const modelReady = (o: string) => modelEntries.get(o)?.status === "ready";
 function renderHome() {
+  if (!worldBootComplete) return;
   if (!room) gameAudio.setScene("menu");
   room ||
     ((local = null),
@@ -564,7 +588,7 @@ function renderRoom() {
     );
 }
 async function prepareOnlineBout(r: PublicRoom) {
-  if (!r.bout || !r.sync || r.sync.ready.includes(myId)) return;
+  if (!world || !r.bout || !r.sync || r.sync.ready.includes(myId)) return;
   const epoch = r.sync.id,
     boutId = r.bout.id;
   if (preparingSync === epoch) return;

@@ -16,6 +16,17 @@
 body {
   margin: 0;
 }
+.booting .site-header {
+  display: none;
+}
+.boot-message {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: #e9edf5;
+  background: #0b0e19;
+}
 button,
 input {
   font: inherit;
