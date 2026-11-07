@@ -1,0 +1,288 @@
+{
+  "date": "2026-11-08",
+  "music": {
+    "title": "Before the Bell",
+    "source": "User upload: Before_the_Bell.mp3",
+    "file": "public/audio/music/before-the-bell.mp3",
+    "bytes": 4358960,
+    "sha256": "973de657e9838d4ce36544d951c1d3888a725896a1528834062077512c9e57c8",
+    "duration_seconds": 181.368125,
+    "modified": false
+  },
+  "effects": [
+    {
+      "name": "punch-1",
+      "path": "public/audio/sfx/punch-1.wav",
+      "source_sha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c",
+      "sha256": "cf051daa4f6f3e95a6813c6c79cdac21e346572493a9addc71e032d6cd97596b",
+      "bytes": 37872,
+      "duration_seconds": 0.428503,
+      "gain_db": -1.9,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "punch-2",
+      "path": "public/audio/sfx/punch-2.wav",
+      "source_sha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349",
+      "sha256": "4b3bdcbcf18910171e91a64281b8663a489ed832061a56a82cf91db3a8c83e8c",
+      "bytes": 35314,
+      "duration_seconds": 0.399501,
+      "gain_db": -1.9,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "punch-3",
+      "path": "public/audio/sfx/punch-3.wav",
+      "source_sha256": "6492f9ccbc8d24dcef607bb1b48790b7870961474561f7fe5601e1c73a3018ef",
+      "sha256": "7d6ee873627ab6e6947122f154d0552656ea54cc89dcee9601612010a503be6b",
+      "bytes": 47652,
+      "duration_seconds": 0.539388,
+      "gain_db": -2.2,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "heavy-1",
+      "path": "public/audio/sfx/heavy-1.wav",
+      "source_sha256": "b33a8f14068aec24ec69ba85e5e87fdc41228975f6a1a3e44a6e7d6fc3d9f8d8",
+      "sha256": "a9a9672d1ab53a84cb655290f820018c875f6c6ed7ac2e128bd166898d45f1f8",
+      "bytes": 57108,
+      "duration_seconds": 0.646599,
+      "gain_db": -2.0,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "heavy-2",
+      "path": "public/audio/sfx/heavy-2.wav",
+      "source_sha256": "f92f5cb6ba4ff2766497292ffd90865654317eeca976f5652e0708dbdcdc0dd9",
+      "sha256": "91b894c40086b105224cf81a7532897b76f603df7735bfab11d81c6b8900518a",
+      "bytes": 47164,
+      "duration_seconds": 0.533855,
+      "gain_db": -1.8,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "heavy-3",
+      "path": "public/audio/sfx/heavy-3.wav",
+      "source_sha256": "7993dd4c156b9979ad69f17be5ebe31850b16039a3857f8477141be54dfee1b3",
+      "sha256": "f53618c0a79542904092425ed7e31548bfc858f40a134eab9cd3199864108526",
+      "bytes": 40206,
+      "duration_seconds": 0.454966,
+      "gain_db": -2.0,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "guard-1",
+      "path": "public/audio/sfx/guard-1.wav",
+      "source_sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3",
+      "sha256": "d7aebaad72b2fd27a09ba56199a505ae0e837ab239706238f91a6facb638099f",
+      "bytes": 10054,
+      "duration_seconds": 0.113107,
+      "gain_db": -2.0,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "guard-2",
+      "path": "public/audio/sfx/guard-2.wav",
+      "source_sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf",
+      "sha256": "dc951cfda6482d763433d1ca78aab41b3b5bfe020d54cbcfd0bd5626acc7930a",
+      "bytes": 15802,
+      "duration_seconds": 0.178277,
+      "gain_db": -2.1,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "fall",
+      "path": "public/audio/sfx/fall.wav",
+      "source_sha256": "49e7ca88743fca974bb8676ea138b751cfd8f9033b5e7af8736c2a215d6edbc1",
+      "sha256": "fed6139126660b8ddfa15cb3644a78dd63612e9b330520230d8f86879cc0e7a2",
+      "bytes": 46366,
+      "duration_seconds": 0.524807,
+      "gain_db": -2.1,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "step-1",
+      "path": "public/audio/sfx/step-1.wav",
+      "source_sha256": "b9524658b52a99a20590f8feefc103088637fd13ea8ec35811aee785e1f2f330",
+      "sha256": "8742978eed24732755b8c61a47c483defcf3cfcd23e35385d1f74f3c18ea9731",
+      "bytes": 14622,
+      "duration_seconds": 0.164898,
+      "gain_db": -1.9,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "step-2",
+      "path": "public/audio/sfx/step-2.wav",
+      "source_sha256": "9af3c3f76705107339e72036e4053bdca3eaa50ad31c8c929f42ce8d40e5d781",
+      "sha256": "2856daa563cdcd00fc9c567e96a5876ab092fe58502b795d0fc1321170b76ab6",
+      "bytes": 12416,
+      "duration_seconds": 0.139887,
+      "gain_db": -1.9,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "select",
+      "path": "public/audio/sfx/select.wav",
+      "source_sha256": "f0e982611e97512fee5f777986b67e8b435434b601f94992ec044f7e89fb5acb",
+      "sha256": "f63dcba4c7105cccca8cb13861548ab5eee245f495c09ffca03bdc682504d57c",
+      "bytes": 14110,
+      "duration_seconds": 0.159093,
+      "gain_db": -1.8,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "bell-start",
+      "path": "public/audio/sfx/bell-start.wav",
+      "source_sha256": "94b8bb5f2d43ab65e4bcc32b28562416e9bc2c51d9fd4be1e333660ee52f977f",
+      "sha256": "e7e9beb5185557a90ffc0de996a510f8b8ae29443768ff6a9a5be3d4822b1aad",
+      "bytes": 130454,
+      "duration_seconds": 1.478186,
+      "gain_db": -1.9,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Impact Sounds",
+        "author": "Kenney",
+        "url": "https://kenney.nl/assets/impact-sounds",
+        "mirror": "https://github.com/Boyquotes/kenney-impact-sounds-for-godot",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "bell-end",
+      "path": "public/audio/sfx/bell-end.wav",
+      "source_sha256": "53b462aba98704d034a703892d0eba2bbd1bb5d65d4c7441894fc57c800a60cf",
+      "sha256": "6e1280e4a1cf12ed65f39b1a9e2ced2fd2ea32320892e41f23ea14d4984c5146",
+      "bytes": 150324,
+      "duration_seconds": 1.703469,
+      "gain_db": 6,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "Dingdingding.wav (Boxing Bell)",
+        "author": "IOII-IOIO-IIOI",
+        "url": "https://commons.wikimedia.org/wiki/File:Dingdingding.wav",
+        "license": "CC0-1.0"
+      }
+    },
+    {
+      "name": "whoosh",
+      "path": "public/audio/sfx/whoosh.wav",
+      "source_sha256": "ee7495217eef33b2180228a732977abdce3e8095fd535cad5497850a862cbfc3",
+      "sha256": "b49019dc4cfa373fadf5865de194631d5d86e91475dbc6e11e15255bda681a7c",
+      "bytes": 45160,
+      "duration_seconds": 0.511134,
+      "gain_db": 19.3,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source": {
+        "title": "whoosh past mic",
+        "author": "TimBahrij",
+        "url": "https://freesound.org/people/TimBahrij/sounds/234915/",
+        "license": "CC0-1.0",
+        "excerpt_seconds": [
+          2.2,
+          2.72
+        ]
+      }
+    }
+  ],
+  "sfx_bytes": 704624,
+  "extra_paid_generation": false
+}

@@ -1,0 +1,394 @@
+{
+  "date": "2026-11-07",
+  "total_consumed_credits": 404,
+  "upgrade_approved_credit_cap": 252,
+  "upgrade_consumed_credits": 252,
+  "assets": [
+    {
+      "character": "nova",
+      "tasks": {
+        "model": "01a1b599-a1fd-7294-b097-8c1bb5b96e9b",
+        "remesh": "01a1b59d-d93d-76fe-b593-11d04fbd9b00",
+        "rig": "01a1b5a2-0b0a-71af-b325-0a069c3c5e45",
+        "animation": "01a1b5a3-c4e5-7572-a46d-50e130205915"
+      },
+      "resources": {
+        "model": "image-to-3d",
+        "remesh": "remesh",
+        "rig": "rigging",
+        "animation": "animate"
+      },
+      "credits": 63,
+      "settings": {
+        "geometry_model": "meshy-7.1",
+        "geometry_resolution": "4k",
+        "texture_model": "meshy-7",
+        "texture_resolution": "4k",
+        "remesh_target_triangles": 120000
+      },
+      "face_count": 123308,
+      "actual_consumed_credits": {
+        "model": 35,
+        "remesh": 5,
+        "rig": 5,
+        "animation": 18
+      },
+      "file": "public/characters/models/nova-hd.glb",
+      "bytes": 36975040,
+      "sha256": "7a30045943f1d913a65375c7799237382118e3f0c98639b006e6ba11ed5200a3",
+      "raw_download_sha256": "2d9dd9bb3bde6a5be692dfd10c1e6335b5f9eef5ec70e998569a36a428010931",
+      "processing": {
+        "tool": "glTF Transform 4.5.1",
+        "processing": [
+          "WebP lossless, effort 60",
+          "prune, keep-leaves and keep-attributes",
+          "LINEAR minification; mipmaps disabled to prevent UV atlas seam bleeding"
+        ],
+        "source_bytes": 51316524,
+        "web_bytes": 36975040,
+        "animations": [
+          "Chest_Pound_Taunt",
+          "Dead",
+          "Dodge_and_Counter",
+          "Left_Hook_from_Guard",
+          "Left_Jab_from_Guard",
+          "Punch_Combo"
+        ],
+        "skins": 1,
+        "texture_checks": [
+          {
+            "role": "color",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "normal",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "metallicRoughness",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          }
+        ],
+        "required_extensions": [
+          "EXT_texture_webp"
+        ],
+        "image_payloads_preserved": true
+      },
+      "quality": "Smoother facial surface and clearer features after high-detail generation; photographic likeness remains approximate."
+    },
+    {
+      "character": "blaze",
+      "tasks": {
+        "model": "01a1b599-b04e-76e3-b17e-f65a88e4629a",
+        "remesh": "01a1b59d-ddaa-7713-b8fa-694a21ba0c3f",
+        "rig": "01a1b5a2-25db-703d-b556-3fcb0e4c5d1a",
+        "animation": "01a1b5a3-ca65-76f2-9a2c-d6b75c6f5314"
+      },
+      "resources": {
+        "model": "image-to-3d",
+        "remesh": "remesh",
+        "rig": "rigging",
+        "animation": "animate"
+      },
+      "credits": 63,
+      "settings": {
+        "geometry_model": "meshy-7.1",
+        "geometry_resolution": "4k",
+        "texture_model": "meshy-7",
+        "texture_resolution": "4k",
+        "remesh_target_triangles": 120000
+      },
+      "face_count": 123180,
+      "actual_consumed_credits": {
+        "model": 35,
+        "remesh": 5,
+        "rig": 5,
+        "animation": 18
+      },
+      "file": "public/characters/models/blaze-hd.glb",
+      "bytes": 36417784,
+      "sha256": "652b784bd6c2c540fdde3380f046565e359120dfe2325a3913c5ee5257fb0190",
+      "raw_download_sha256": "a53d44d236d5f781669a4e90fe47edd2e24bcc65a5837545f70bd2873039f04e",
+      "processing": {
+        "tool": "glTF Transform 4.5.1",
+        "processing": [
+          "WebP lossless, effort 60",
+          "prune, keep-leaves and keep-attributes",
+          "LINEAR minification; mipmaps disabled to prevent UV atlas seam bleeding"
+        ],
+        "source_bytes": 50374900,
+        "web_bytes": 36417784,
+        "animations": [
+          "Chest_Pound_Taunt",
+          "Dead",
+          "Dodge_and_Counter",
+          "Left_Hook_from_Guard",
+          "Left_Jab_from_Guard",
+          "Right_Upper_Hook_from_Guard"
+        ],
+        "skins": 1,
+        "texture_checks": [
+          {
+            "role": "color",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "normal",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "metallicRoughness",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          }
+        ],
+        "required_extensions": [
+          "EXT_texture_webp"
+        ],
+        "image_payloads_preserved": true
+      },
+      "quality": "Smoother facial surface and clearer features after high-detail generation; photographic likeness remains approximate."
+    },
+    {
+      "character": "specs",
+      "tasks": {
+        "model": "01a1b599-b9f3-705a-a2d2-739f7e3e5d4b",
+        "remesh": "01a1b59d-e086-7497-9d10-970fbc901537",
+        "rig": "01a1b5a2-3ea4-7693-8704-bbc12c246bb9",
+        "animation": "01a1b5a3-d023-7169-a72e-1e1a33d712bf"
+      },
+      "resources": {
+        "model": "image-to-3d",
+        "remesh": "remesh",
+        "rig": "rigging",
+        "animation": "animate"
+      },
+      "credits": 63,
+      "settings": {
+        "geometry_model": "meshy-7.1",
+        "geometry_resolution": "4k",
+        "texture_model": "meshy-7",
+        "texture_resolution": "4k",
+        "remesh_target_triangles": 120000
+      },
+      "face_count": 123341,
+      "actual_consumed_credits": {
+        "model": 35,
+        "remesh": 5,
+        "rig": 5,
+        "animation": 18
+      },
+      "file": "public/characters/models/specs-hd.glb",
+      "bytes": 34500624,
+      "sha256": "ff21c8042cf2327e6c7429acd75c94457e1c93dbc2b7e992c834d53884a32148",
+      "raw_download_sha256": "3a8678a0da3b945efd5d59ce0e6847b4a0b5e1ca40b2cbb27b208359610e2fb8",
+      "processing": {
+        "tool": "glTF Transform 4.5.1",
+        "processing": [
+          "WebP lossless, effort 60",
+          "prune, keep-leaves and keep-attributes",
+          "LINEAR minification; mipmaps disabled to prevent UV atlas seam bleeding"
+        ],
+        "source_bytes": 48265268,
+        "web_bytes": 34500624,
+        "animations": [
+          "Chest_Pound_Taunt",
+          "Counterstrike",
+          "Dead",
+          "Dodge_and_Counter",
+          "Left_Hook_from_Guard",
+          "Left_Jab_from_Guard"
+        ],
+        "skins": 1,
+        "texture_checks": [
+          {
+            "role": "color",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "normal",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "metallicRoughness",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          }
+        ],
+        "required_extensions": [
+          "EXT_texture_webp"
+        ],
+        "image_payloads_preserved": true
+      },
+      "quality": "Smoother facial surface and clearer features after high-detail generation; photographic likeness remains approximate."
+    },
+    {
+      "character": "volt",
+      "tasks": {
+        "model": "01a1b599-c2e8-714f-8a38-f8e1cc9a6714",
+        "remesh": "01a1b59e-2113-70dc-be74-a21c871f1bc5",
+        "rig": "01a1b5a2-5723-7769-987b-434ff3559a3d",
+        "animation": "01a1b5a3-d60d-767e-9192-14967a082afe"
+      },
+      "resources": {
+        "model": "image-to-3d",
+        "remesh": "remesh",
+        "rig": "rigging",
+        "animation": "animate"
+      },
+      "credits": 63,
+      "settings": {
+        "geometry_model": "meshy-7.1",
+        "geometry_resolution": "4k",
+        "texture_model": "meshy-7",
+        "texture_resolution": "4k",
+        "remesh_target_triangles": 120000
+      },
+      "face_count": 124197,
+      "actual_consumed_credits": {
+        "model": 35,
+        "remesh": 5,
+        "rig": 5,
+        "animation": 18
+      },
+      "file": "public/characters/models/volt-hd.glb",
+      "bytes": 33788024,
+      "sha256": "0ac79ae11d760112c30b60c6c3715aec61ac16a3f52267eb6560f9d362bd1e1e",
+      "raw_download_sha256": "eb1fc6645d203a40af6dd18c11057010916553cf8e89488d8dd2e1fcbe1541b6",
+      "processing": {
+        "tool": "glTF Transform 4.5.1",
+        "processing": [
+          "WebP lossless, effort 60",
+          "prune, keep-leaves and keep-attributes",
+          "LINEAR minification; mipmaps disabled to prevent UV atlas seam bleeding"
+        ],
+        "source_bytes": 47695868,
+        "web_bytes": 33788024,
+        "animations": [
+          "Chest_Pound_Taunt",
+          "Dead",
+          "Dodge_and_Counter",
+          "Left_Hook_from_Guard",
+          "Left_Jab_from_Guard",
+          "Right_Uppercut_from_Guard"
+        ],
+        "skins": 1,
+        "texture_checks": [
+          {
+            "role": "color",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "normal",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          },
+          {
+            "role": "metallicRoughness",
+            "width": 4096,
+            "height": 4096,
+            "decoded_pixels_identical": true
+          }
+        ],
+        "required_extensions": [
+          "EXT_texture_webp"
+        ],
+        "image_payloads_preserved": true
+      },
+      "quality": "Smoother facial surface and clearer features after high-detail generation; photographic likeness remains approximate."
+    }
+  ],
+  "previous_generation": {
+    "date": "2026-11-07",
+    "total_consumed_credits": 152,
+    "assets": [
+      {
+        "character": "nova",
+        "tasks": {
+          "model": "01a1b579-8aa0-7126-a899-0d68f61070ea",
+          "rig": "01a1b57d-6964-7257-9866-03a995ce91d8",
+          "animation": "01a1b57e-4080-7077-8fdc-bb33ba315453"
+        },
+        "credits": 38,
+        "bytes": 4906248,
+        "sha256": "1da8735fa29720cdf4fc04317947fc5f2bdc0870d5da563e1a0961820a6bdda9",
+        "actual_consumed_credits": {
+          "model": 15,
+          "rig": 5,
+          "animation": 18
+        },
+        "quality": "Full-body game integration verified; close facial surface artifacts remain under review."
+      },
+      {
+        "character": "blaze",
+        "tasks": {
+          "model": "01a1b579-92a3-718a-a10e-a229c9c7f9f8",
+          "rig": "01a1b57d-795c-7260-9d95-07f71f30ec97",
+          "animation": "01a1b57e-44c9-77fe-9342-005a218129da"
+        },
+        "credits": 38,
+        "bytes": 4605324,
+        "sha256": "2acc1fa8a6f0d5cacc8df12fb54c9eb426e72c74beeffbd64fc357242dc3a0d3",
+        "actual_consumed_credits": {
+          "model": 15,
+          "rig": 5,
+          "animation": 18
+        },
+        "quality": "Full-body game integration verified; close facial surface artifacts remain under review."
+      },
+      {
+        "character": "specs",
+        "tasks": {
+          "model": "01a1b579-9b0d-721f-83a1-13927c566d9d",
+          "rig": "01a1b57d-88c4-75f1-ac3b-db4788b70773",
+          "animation": "01a1b57e-4805-77d6-a9e2-36a7f3435054"
+        },
+        "credits": 38,
+        "bytes": 4539576,
+        "sha256": "0c5e3feed7549a6e4c0976f16a5c9b3df01da6888243c1be743205108b504c64",
+        "actual_consumed_credits": {
+          "model": 15,
+          "rig": 5,
+          "animation": 18
+        },
+        "quality": "Full-body game integration verified; close facial surface artifacts remain under review."
+      },
+      {
+        "character": "volt",
+        "tasks": {
+          "model": "01a1b579-a21d-7279-8efc-fee65c82d789",
+          "rig": "01a1b57d-9836-75a7-b99e-81540a160286",
+          "animation": "01a1b57e-4b7b-726d-bc69-d58e5e240ae6"
+        },
+        "credits": 38,
+        "bytes": 4352844,
+        "sha256": "4805520a519184f239b280cf771acce18c6c0ed60abbcb70ae0e9f2c15cb50e3",
+        "actual_consumed_credits": {
+          "model": 15,
+          "rig": 5,
+          "animation": 18
+        },
+        "quality": "Full-body game integration verified; close facial surface artifacts remain under review."
+      }
+    ]
+  }
+}

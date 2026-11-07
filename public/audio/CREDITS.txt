@@ -1,0 +1,25 @@
+RING CLUB audio sources
+
+Music
+Before the Bell — supplied by the project owner as Before_the_Bell.mp3.
+The supplied MP3 is included unchanged. No third-party license is asserted for it.
+
+Recorded sound effects
+Kenney — Impact Sounds, CC0 1.0 Universal.
+Original pack: https://kenney.nl/assets/impact-sounds
+Source mirror: https://github.com/Boyquotes/kenney-impact-sounds-for-godot
+Used: impact_punch_medium_000–002, impact_punch_heavy_000–002,
+impact_soft_medium_000–001, impact_soft_heavy_000,
+footstep_carpet_000–001, impact_generic_light_000, impact_bell_heavy_000.
+
+TimBahrij — “whoosh past mic”, Freesound #234915, CC0 1.0.
+https://freesound.org/people/TimBahrij/sounds/234915/
+The author describes recording with a Tascam DR-05.
+Public preview excerpt 2.20–2.72 seconds, trimmed, faded and normalized.
+
+IOII-IOIO-IIOI — “Dingdingding.wav” (Boxing Bell), Wikimedia Commons, CC0 1.0.
+https://commons.wikimedia.org/wiki/File:Dingdingding.wav
+
+Effects converted to 44.1 kHz mono PCM WAV, leading silence trimmed,
+peaks adjusted, and short fades applied. Original sources retained privately.
+CC0: https://creativecommons.org/publicdomain/zero/1.0/

@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "characters": {
+    "mint": {
+      "status": "pending",
+      "model": null,
+      "source": "Original photo unavailable in workspace; temporary model in use",
+      "taskId": null,
+      "referencePhoto": null
+    },
+    "ace": {
+      "status": "pending",
+      "model": null,
+      "source": "Original photo unavailable in workspace; temporary model in use",
+      "taskId": null,
+      "referencePhoto": null
+    },
+    "ink": {
+      "status": "pending",
+      "model": null,
+      "source": "Original photo unavailable in workspace; temporary model in use",
+      "taskId": null,
+      "referencePhoto": null
+    },
+    "stone": {
+      "status": "pending",
+      "model": null,
+      "source": "Original photo unavailable in workspace; temporary model in use",
+      "taskId": null,
+      "referencePhoto": null
+    },
+    "nova": {
+      "status": "ready",
+      "model": "/characters/models/nova-hd.glb",
+      "portrait": "/characters/models/nova-hd-portrait.png",
+      "source": "Meshy 7.1 Ultra geometry, 4K PBR, rigged and animated; photo-inspired likeness",
+      "taskId": "01a1b5a3-c4e5-7572-a46d-50e130205915",
+      "tasks": {
+        "model": "01a1b599-a1fd-7294-b097-8c1bb5b96e9b",
+        "remesh": "01a1b59d-d93d-76fe-b593-11d04fbd9b00",
+        "rig": "01a1b5a2-0b0a-71af-b325-0a069c3c5e45",
+        "animation": "01a1b5a3-c4e5-7572-a46d-50e130205915"
+      },
+      "clips": {
+        "jab": "Left_Jab_from_Guard",
+        "hook": "Left_Hook_from_Guard",
+        "ko": "Dead",
+        "taunt": "Chest_Pound_Taunt",
+        "dodge": "Dodge_and_Counter",
+        "skill-nova": "Punch_Combo"
+      }
+    },
+    "blaze": {
+      "status": "ready",
+      "model": "/characters/models/blaze-hd.glb",
+      "portrait": "/characters/models/blaze-hd-portrait.png",
+      "source": "Meshy 7.1 Ultra geometry, 4K PBR, rigged and animated; photo-inspired likeness",
+      "taskId": "01a1b5a3-ca65-76f2-9a2c-d6b75c6f5314",
+      "tasks": {
+        "model": "01a1b599-b04e-76e3-b17e-f65a88e4629a",
+        "remesh": "01a1b59d-ddaa-7713-b8fa-694a21ba0c3f",
+        "rig": "01a1b5a2-25db-703d-b556-3fcb0e4c5d1a",
+        "animation": "01a1b5a3-ca65-76f2-9a2c-d6b75c6f5314"
+      },
+      "clips": {
+        "jab": "Left_Jab_from_Guard",
+        "hook": "Left_Hook_from_Guard",
+        "ko": "Dead",
+        "taunt": "Chest_Pound_Taunt",
+        "dodge": "Dodge_and_Counter",
+        "skill-blaze": "Right_Upper_Hook_from_Guard"
+      }
+    },
+    "specs": {
+      "status": "ready",
+      "model": "/characters/models/specs-hd.glb",
+      "portrait": "/characters/models/specs-hd-portrait.png",
+      "source": "Meshy 7.1 Ultra geometry, 4K PBR, rigged and animated; photo-inspired likeness",
+      "taskId": "01a1b5a3-d023-7169-a72e-1e1a33d712bf",
+      "tasks": {
+        "model": "01a1b599-b9f3-705a-a2d2-739f7e3e5d4b",
+        "remesh": "01a1b59d-e086-7497-9d10-970fbc901537",
+        "rig": "01a1b5a2-3ea4-7693-8704-bbc12c246bb9",
+        "animation": "01a1b5a3-d023-7169-a72e-1e1a33d712bf"
+      },
+      "clips": {
+        "jab": "Left_Jab_from_Guard",
+        "hook": "Left_Hook_from_Guard",
+        "ko": "Dead",
+        "taunt": "Chest_Pound_Taunt",
+        "dodge": "Dodge_and_Counter",
+        "skill-specs": "Counterstrike"
+      }
+    },
+    "volt": {
+      "status": "ready",
+      "model": "/characters/models/volt-hd.glb",
+      "portrait": "/characters/models/volt-hd-portrait.png",
+      "source": "Meshy 7.1 Ultra geometry, 4K PBR, rigged and animated; photo-inspired likeness",
+      "taskId": "01a1b5a3-d60d-767e-9192-14967a082afe",
+      "tasks": {
+        "model": "01a1b599-c2e8-714f-8a38-f8e1cc9a6714",
+        "remesh": "01a1b59e-2113-70dc-be74-a21c871f1bc5",
+        "rig": "01a1b5a2-5723-7769-987b-434ff3559a3d",
+        "animation": "01a1b5a3-d60d-767e-9192-14967a082afe"
+      },
+      "clips": {
+        "jab": "Left_Jab_from_Guard",
+        "hook": "Left_Hook_from_Guard",
+        "ko": "Dead",
+        "taunt": "Chest_Pound_Taunt",
+        "dodge": "Dodge_and_Counter",
+        "skill-volt": "Right_Uppercut_from_Guard"
+      }
+    }
+  }
+}
