@@ -15,7 +15,7 @@ The current clock turns amber in the final30seconds and red with restrained moti
 - [x] Integrate a controlled crowd audio bus and seamless loop in GameAudio, preserve existing music/effects behavior, mute/visibility semantics and action priority.
 - [x] Connect paused state, clock/danger styling and saved crowd-volume setting in the existing DOM UI.
 - [x] Verify source licenses/hashes, admit only final audio and sanitized provenance, then run units/build and meaningful browser checks of real audio playback and UI transitions.
-- [ ] Obtain one independent review; resolve material findings, check public rooms, deploy verified source, observe exact public build and smoke-test on https://ring-club-boxing.onrender.com.
+- [x] Obtain one independent review; resolve material findings, check public rooms, deploy verified source, observe exact public build and smoke-test on https://ring-club-boxing.onrender.com.
 
 ## Constraints and review focus
 
@@ -32,4 +32,7 @@ The current clock turns amber in the final30seconds and red with restrained moti
 - Nine atmosphere unit tests cover actual hits/misses/combos/skills, duplicate snapshots, cooldown, final-time boundaries, pauses/reset and endings. Total51 unit tests passed.
 - Native WebAudio checks reproduced delayed cheers surviving mute, result snapshots cancelling the finish tail, and a suspended context failing to restart the bed. Each behavior was fixed and its real audio regression passed.
 - One independent code review found the result-tail issue, now fixed; no remaining Critical/Important findings. Subjective listening and actual OS/browser policies remain distinct from native playback verification.
-- Production build and the full25-test browser suite passed (4.1 minutes). Public readiness/version observation and a real crowd playback smoke test remain before deployment can be called verified.
+- Production build and the full25-test browser suite passed (4.1 minutes).
+- Releasea0fa11e was pushed to main and automatically deployed. The public health endpoint returned200 with0 rooms; every referenced JS/CSS bundle and all three crowd WAV files matched the locally verified build byte-for-byte.
+- The public Chromium smoke test passed (26.9 seconds): real non-silent bed, actual combat damage, medium cheers and larger roars, crowd cleanup and song restoration on menu return, and crowd-volume persistence independent of music. No page or asset HTTP errors were observed. The first cold probe missed the medium reaction during continuous attacks; an unchanged-code rerun with native diagnostics observed both tiers and passed. Local deterministic reaction tests also passed.
+- A public first-person combat screenshot was inspected. The existing playfield and HUD layout are preserved. Private public-version and smoke receipts are retained in .asset-jobs/crowd/.
