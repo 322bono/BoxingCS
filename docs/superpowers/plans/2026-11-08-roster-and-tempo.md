@@ -10,10 +10,14 @@ Update dependent tests to active characters without losing assertions for host s
 - [x] Remove retired definitions/signatures/manifest entries; migrate defaults and saved selections; update four-slot UI and fixtures.
 - [x] Apply common tempo parameters, preserve authoritative fairness and verify four-style balance.
 - [x] Verify build, units and browser gameplay/roster/migration checks and inspect screenshots.
-- [ ] Publish and confirm exact public build and a live match.
+- [x] Publish and confirm exact public build and a live match.
 
 Review focus: old localStorage values must not crash the picker; legacy clients must not inject removed IDs; diagonal movement must remain normalized; faster recovery must still require stamina and respect guard; first-load model initialization must not bypass readiness or load behind the menu.
 
 ## Verification so far
 
-All60 unit tests and the complete30-case Chromium suite passed (5.0 minutes), including four-style seeded balance, seat-order fairness, stamina/recovery, real models and skills, online readiness/reconnect, delayed manifest refresh, legacy-choice migration and phone layout. TypeScript and the production build passed. Desktop/phone roster screenshots were inspected; the final thumbnail-only CSS adjustment also passed the focused three-case roster browser check (25.2 seconds) and a new production build. Source GLBs, textures, hands, camera and audio files remain intact. Public version, server movement measurement and live reconnect validation remain before completion.
+All60 unit tests and the complete30-case Chromium suite passed (5.0 minutes), including four-style seeded balance, seat-order fairness, stamina/recovery, real models and skills, online readiness/reconnect, delayed manifest refresh, legacy-choice migration and phone layout. TypeScript and the production build passed. Desktop/phone roster screenshots were inspected; the final thumbnail-only CSS adjustment also passed the focused three-case roster browser check (25.2 seconds) and a new production build. Source GLBs, textures, hands, camera and audio files remain intact.
+
+Releasefe010b9 was pushed to main and automatically deployed. The public production JS/CSS bundles matched the tested build byte-for-byte; the public model manifest contained exactly Nova, Blaze, Specs and Volt. Two real public browsers confirmed the four-slot roster, retired-save migration, shared countdown, real combat damage, same-bout reconnect, forfeit and menu return over WebSocket. Nova's measured authoritative movement was2.916m/s, matching the2.7 baseline with its1.08 speed multiplier. The public test passed in2.9 minutes and removed its lobby; health returned200 with0 rooms.
+
+The first public reconnect probe used a45-second assertion limit and ended during the resumed countdown. Recorded snapshots showed both players ready in the same bout. Aligning the private probe's wait with the existing60-second model-readiness allowance plus countdown (65 seconds) passed without any game-code or server-policy change. Private version, movement and reconnect receipts and public screenshots are retained under .asset-jobs/tempo/.
