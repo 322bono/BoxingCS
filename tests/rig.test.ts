@@ -74,7 +74,7 @@ test("each character has a distinct playable skill clip and normal combat clips"
         JSON.stringify(c.tracks.map((t) => Array.from(t.values))),
       ),
     ).size,
-    8,
+    4,
   );
   const mixer = new T.AnimationMixer(model);
   const arm = model.getObjectByName("mixamorigRightArm")!;
@@ -101,14 +101,14 @@ test("unrigged input is rejected instead of pretending that a static model is an
 });
 test("a controller reset starts a rematch out of a prior KO pose", () => {
   const root = prepareFighter(fixture());
-  const controller = new RigController(root, "ace");
-  const f = createBout(["a", "b"], ["ace", "mint"]).fighters[0];
+  const controller = new RigController(root, "nova");
+  const f = createBout(["a", "b"], ["nova", "volt"]).fighters[0];
   f.hp = 0;
   controller.update(f, 1);
   assert.equal(controller.current, "ko");
   controller.reset();
   controller.update(
-    createBout(["a", "b"], ["ace", "mint"]).fighters[0],
+    createBout(["a", "b"], ["nova", "volt"]).fighters[0],
     1 / 30,
   );
   assert.equal(controller.current, "idle");
@@ -124,7 +124,7 @@ test("disposing an instance releases its bone texture without disposing the sour
   const instance = prepareFighter(template),
     mesh = instance.getObjectByProperty("isSkinnedMesh", true) as T.SkinnedMesh;
   mesh.skeleton.computeBoneTexture();
-  new RigController(instance, "ace").dispose();
+  new RigController(instance, "nova").dispose();
   assert.equal(mesh.skeleton.boneTexture, null);
   assert.ok(source.skeleton.boneTexture);
   source.skeleton.dispose();

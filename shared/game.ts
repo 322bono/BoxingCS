@@ -1,57 +1,5 @@
 export const CHARACTERS = [
   {
-    id: "mint",
-    name: "모스",
-    title: "THE TACTICIAN",
-    color: "#a3bf68",
-    skin: "#e7b99a",
-    power: 0.94,
-    speed: 1,
-    endurance: 1.06,
-    description: "침착한 가드, 오래 가는 체력.",
-    trait: "수비형",
-    stats: [3, 3, 4],
-  },
-  {
-    id: "ace",
-    name: "에이스",
-    title: "THE OUTBOXER",
-    color: "#dad7cf",
-    skin: "#e4b394",
-    power: 0.92,
-    speed: 1.12,
-    endurance: 0.96,
-    description: "빠르게 들어가고, 가볍게 빠진다.",
-    trait: "스피드형",
-    stats: [2, 5, 3],
-  },
-  {
-    id: "ink",
-    name: "잉크",
-    title: "THE SLUGGER",
-    color: "#e87855",
-    skin: "#c79e83",
-    power: 1.12,
-    speed: 0.94,
-    endurance: 0.94,
-    description: "한 번의 기회를 묵직한 한 방으로.",
-    trait: "파워형",
-    stats: [5, 2, 3],
-  },
-  {
-    id: "stone",
-    name: "스톤",
-    title: "THE ALL-ROUNDER",
-    color: "#8f9fbf",
-    skin: "#dab097",
-    power: 1,
-    speed: 1,
-    endurance: 1,
-    description: "빈틈없는 기본기, 흔들리지 않는 리듬.",
-    trait: "균형형",
-    stats: [3, 4, 3],
-  },
-  {
     id: "nova",
     name: "노바",
     title: "THE COMBINATION",
@@ -214,7 +162,7 @@ export function stepBout(b: Bout, inputs: [Input, Input], dt: number): void {
     f.dodgeCooldown = Math.max(0, f.dodgeCooldown - dt);
     f.guard = input.guard && f.stamina > 3;
     f.stamina = clamp(
-      f.stamina + dt * (f.guard ? 6 : 15) * c.endurance,
+      f.stamina + dt * (f.guard ? 6 : 18) * c.endurance,
       0,
       100,
     );
@@ -230,7 +178,7 @@ export function stepBout(b: Bout, inputs: [Input, Input], dt: number): void {
       st = clamp(input.strafe, -1, 1),
       norm = Math.max(1, Math.hypot(fw, st));
     const speed =
-      dt * 2 * c.speed * (f.guard ? 0.45 : 1) * (f.evade > 0 ? 1.8 : 1);
+      dt * 2.7 * c.speed * (f.guard ? 0.45 : 1) * (f.evade > 0 ? 1.8 : 1);
     f.x = clamp(
       f.x + (((dx / len) * fw - (dz / len) * st) / norm) * speed,
       -2.8,
@@ -283,11 +231,7 @@ export function stepBout(b: Bout, inputs: [Input, Input], dt: number): void {
       f.stamina >= cost
     ) {
       f.stamina -= cost;
-      f.cooldown = special
-        ? f.character === "ink"
-          ? 1.5
-          : 1.15
-        : (heavy ? 0.85 : 0.36) / c.speed;
+      f.cooldown = special ? 1.15 : (heavy ? 0.7 : 0.28) / c.speed;
       if (special) {
         f.meter = 0;
         f.skillSerial++;
@@ -296,29 +240,11 @@ export function stepBout(b: Bout, inputs: [Input, Input], dt: number): void {
       f.kind = special ? "skill" : heavy ? "hook" : "jab";
       if (
         Math.hypot(f.x - o.x, f.z - o.z) <
-          (special
-            ? f.character === "ace"
-              ? 2.2
-              : f.character === "ink"
-                ? 1.5
-                : 1.9
-            : heavy
-              ? 1.45
-              : 1.75) &&
+          (special ? 1.9 : heavy ? 1.45 : 1.75) &&
         o.evade === 0
       ) {
         damage[1 - i] =
-          (special
-            ? f.character === "ink"
-              ? 30
-              : f.character === "ace" || f.character === "mint"
-                ? 22
-                : 26
-            : heavy
-              ? 16
-              : 7) *
-          c.power *
-          (o.guard ? (special && f.character === "mint" ? 0.6 : 0.25) : 1);
+          (special ? 26 : heavy ? 16 : 7) * c.power * (o.guard ? 0.25 : 1);
         f.hits++;
         f.combo++;
         f.comboTime = 1.8;

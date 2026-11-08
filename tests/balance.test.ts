@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { CHARACTERS, createBout, stepBout, aiInput } from "../shared/game.ts";
 // Catch a roster change that gives one style an outsized advantage under identical AI policies.
 // This is an initial regression check, not evidence of balance across human skill levels.
-test("all eight styles stay within 35–65% wins across 1120 seeded sparring bouts", () => {
+test("all four styles stay within 35–65% wins across 240 seeded sparring bouts", () => {
   const totals = new Map(CHARACTERS.map((c) => [c.id, { wins: 0, bouts: 0 }]));
   for (const a of CHARACTERS)
     for (const b of CHARACTERS)

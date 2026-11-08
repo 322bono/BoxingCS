@@ -35,7 +35,7 @@ test("local AI practice remains playable when the online server cannot connect",
   await expect(page.locator(".console-online")).toContainText("연결 중");
   await page.getByRole("button", { name: "AI 연습", exact: true }).click();
   await page
-    .getByRole("button", { name: "모스 미리보기", exact: true })
+    .getByRole("button", { name: "노바 미리보기", exact: true })
     .click();
   await page.getByRole("button", { name: "이 파이터로 계속" }).click();
   await page.getByLabel("닉네임").fill("오프라인검증");

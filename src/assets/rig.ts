@@ -1,16 +1,7 @@
 import * as THREE from "three";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
 import type { Fighter } from "../../shared/game";
-export const signatureIds = [
-  "mint",
-  "ace",
-  "ink",
-  "stone",
-  "nova",
-  "blaze",
-  "specs",
-  "volt",
-] as const;
+export const signatureIds = ["nova", "blaze", "specs", "volt"] as const;
 type Joint =
   | "hips"
   | "spine"
@@ -57,46 +48,6 @@ const guard: Pose = {
 };
 // Separate authored pose timelines. Values are rotations relative to the imported bind pose.
 const signatures: Record<(typeof signatureIds)[number], Pose[]> = {
-  mint: [
-    { spine: [-0.2, -0.25, 0], rightArm: [-0.7, 0, -0.9] },
-    {
-      spine: [0.12, 0.6, 0],
-      rightArm: [-1.5, -0.4, -0.4],
-      rightForeArm: [-0.2, 0, 0],
-    },
-    { spine: [0, 0.1, 0] },
-  ],
-  ace: [
-    { spine: [0.23, 0.4, 0.12], leftArm: [-0.4, 0, 0.8] },
-    {
-      spine: [0.12, -0.5, 0],
-      leftArm: [-1.6, 0.3, 0.1],
-      leftForeArm: [-0.1, 0, 0],
-    },
-    {
-      spine: [0.04, 0.55, -0.08],
-      rightArm: [-1.7, -0.4, -0.15],
-      rightForeArm: [-0.05, 0, 0],
-    },
-  ],
-  ink: [
-    { spine: [-0.18, -0.75, -0.15], rightArm: [0.2, -0.5, -1.2] },
-    {
-      spine: [0.25, 0.85, 0.17],
-      rightArm: [-1.3, 0.85, -0.7],
-      rightForeArm: [-0.6, 0, 0],
-    },
-    { spine: [0.15, 0.35, 0.08], head: [0.1, -0.2, 0] },
-  ],
-  stone: [
-    { spine: [0.5, 0, 0], leftArm: [0.3, 0, 0.5], rightArm: [0.3, 0, -0.5] },
-    {
-      spine: [-0.25, 0.2, 0],
-      leftArm: [-1.8, 0, 0.2],
-      rightArm: [-1.8, 0, -0.2],
-    },
-    { spine: [-0.12, 0, 0], head: [-0.1, 0, 0] },
-  ],
   nova: [
     { spine: [0.2, -0.2, 0], leftArm: [-0.8, 0, 0.5] },
     { spine: [0.05, -0.6, 0], leftArm: [-1.7, 0.2, 0], leftForeArm: [0, 0, 0] },
@@ -219,9 +170,7 @@ export function buildCombatClips(root: THREE.Object3D): THREE.AnimationClip[] {
       { hips: [-0.55, 0, 0.3], spine: [-0.4, 0, 0] },
       { hips: [-1.4, 0, 0.2], spine: [-0.3, 0, 0] },
     ]),
-    ...signatureIds.map((id) =>
-      clip("skill-" + id, id === "ink" ? 1.15 : 0.95, signatures[id]),
-    ),
+    ...signatureIds.map((id) => clip("skill-" + id, 0.95, signatures[id])),
   ];
 }
 export function prepareFighter(source: THREE.Object3D): THREE.Group {
@@ -319,7 +268,7 @@ export class RigController {
   }
   private duration(name: string) {
     return name.startsWith("skill-")
-      ? this.character === "blaze" || this.character === "ink"
+      ? this.character === "blaze"
         ? 1.05
         : 0.85
       : {

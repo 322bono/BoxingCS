@@ -176,16 +176,7 @@ test("phone layout keeps glove proportions and forearms continue below the visib
 test("jab, hook and all signatures remain in front of the near plane and change only the rendered hands", () => {
   const view = new FirstPersonHands();
   const fighter = createBout(["a", "b"], ["nova", "volt"]).fighters[0];
-  for (const character of [
-    "mint",
-    "ace",
-    "ink",
-    "stone",
-    "nova",
-    "blaze",
-    "specs",
-    "volt",
-  ] as const) {
+  for (const character of ["nova", "blaze", "specs", "volt"] as const) {
     fighter.character = character;
     for (const kind of ["jab", "hook", "skill"] as const) {
       fighter.kind = kind;

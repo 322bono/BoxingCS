@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createBout, stepBout, idleInput, CHARACTERS } from "../shared/game.ts";
 // Catch unrestricted remote damage, ignored block, stamina bypass, and post-KO hits.
 test("attacks miss outside reach and damage an opponent inside reach", () => {
-  const b = createBout(["a", "b"], ["stone", "stone"]);
+  const b = createBout(["a", "b"], ["specs", "specs"]);
   b.countdown = 0;
   stepBout(b, [{ ...idleInput(), jab: true }, idleInput()], 1 / 30);
   assert.equal(b.fighters[1].hp, 100);
@@ -15,7 +15,7 @@ test("attacks miss outside reach and damage an opponent inside reach", () => {
   assert.equal(b.fighters[0].hits, 1);
 });
 test("guard reduces damage and exhausted fighters cannot punch", () => {
-  const b = createBout(["a", "b"], ["stone", "stone"]);
+  const b = createBout(["a", "b"], ["specs", "specs"]);
   b.countdown = 0;
   b.fighters[0].z = -0.5;
   b.fighters[1].z = 0.5;
@@ -35,7 +35,7 @@ test("guard reduces damage and exhausted fighters cannot punch", () => {
   assert.equal(b.fighters[1].hp, hp);
 });
 test("KO locks the result and countdown prevents early punches", () => {
-  const b = createBout(["a", "b"], ["ink", "ace"]);
+  const b = createBout(["a", "b"], ["blaze", "nova"]);
   b.fighters[0].z = -0.5;
   b.fighters[1].z = 0.5;
   stepBout(b, [{ ...idleInput(), hook: true }, idleInput()], 1 / 30);
@@ -50,7 +50,7 @@ test("KO locks the result and countdown prevents early punches", () => {
   assert.equal(b.time, time);
 });
 test("movement stays inside ring and cannot overlap fighters", () => {
-  const b = createBout(["a", "b"], ["stone", "stone"]);
+  const b = createBout(["a", "b"], ["specs", "specs"]);
   b.countdown = 0;
   for (let i = 0; i < 500; i++)
     stepBout(
@@ -69,7 +69,7 @@ test("movement stays inside ring and cannot overlap fighters", () => {
   );
 });
 test("signature consumes a full meter and cannot bypass range or cooldown", () => {
-  const b = createBout(["a", "b"], ["stone", "ink"]);
+  const b = createBout(["a", "b"], ["specs", "blaze"]);
   b.countdown = 0;
   const a = b.fighters[0] as any;
   a.meter = 100;
@@ -85,31 +85,33 @@ test("signature consumes a full meter and cannot bypass range or cooldown", () =
   stepBout(b, [{ ...idleInput(), skill: true } as any, idleInput()], 1 / 30);
   assert.ok(b.fighters[1].hp <= 76);
 });
-test("guard-break, reach and power signatures have distinct counterplay", () => {
-  const hit = (id: any, range: number, block: boolean) => {
-    const b = createBout(["a", "b"], [id, "stone"]);
+test("the remaining power and endurance styles retain their tradeoffs", () => {
+  const results = CHARACTERS.map(({ id }) => {
+    const b = createBout(["a", "b"], [id, "specs"]);
     b.countdown = 0;
+    b.fighters[0].z = 0.5;
+    b.fighters[1].z = -0.5;
     b.fighters[0].meter = 100;
-    b.fighters[0].z = range / 2;
-    b.fighters[1].z = -range / 2;
-    stepBout(
-      b,
-      [
-        { ...idleInput(), skill: true },
-        { ...idleInput(), guard: block },
-      ],
-      1 / 30,
-    );
-    return 100 - b.fighters[1].hp;
-  };
-  assert.ok(hit("mint", 1, true) > hit("stone", 1, true));
-  assert.ok(hit("ace", 2, false) > 0);
-  assert.equal(hit("ink", 2, false), 0);
-  assert.ok(hit("ink", 1, false) > hit("stone", 1, false));
+    b.fighters[0].stamina = 50;
+    stepBout(b, [{ ...idleInput(), skill: true }, idleInput()], 1 / 30);
+    return {
+      id,
+      damage: 100 - b.fighters[1].hp,
+      stamina: b.fighters[0].stamina,
+    };
+  });
+  assert.ok(
+    results.find((r) => r.id === "blaze")!.damage >
+      results.find((r) => r.id === "nova")!.damage,
+  );
+  assert.ok(
+    results.find((r) => r.id === "specs")!.stamina >
+      results.find((r) => r.id === "volt")!.stamina,
+  );
 });
 
 test("a hit received this tick cannot unlock a skill for only the later seat", () => {
-  const b = createBout(["host", "guest"], ["stone", "stone"]);
+  const b = createBout(["host", "guest"], ["specs", "specs"]);
   b.countdown = 0;
   b.fighters[0].z = -0.5;
   b.fighters[1].z = 0.5;
@@ -122,7 +124,7 @@ test("a hit received this tick cannot unlock a skill for only the later seat", (
   );
   assert.deepEqual(
     b.fighters.map((f) => f.hp),
-    [93, 93],
+    [93.35, 93.35],
   );
   assert.deepEqual(
     b.fighters.map((f) => f.meter),
@@ -131,7 +133,7 @@ test("a hit received this tick cannot unlock a skill for only the later seat", (
 });
 
 test("simultaneous skills preserve the same received meter in both seats", () => {
-  const b = createBout(["host", "guest"], ["stone", "stone"]);
+  const b = createBout(["host", "guest"], ["specs", "specs"]);
   b.countdown = 0;
   b.fighters[0].z = -0.5;
   b.fighters[1].z = 0.5;
@@ -140,7 +142,7 @@ test("simultaneous skills preserve the same received meter in both seats", () =>
   stepBout(b, [attack, attack], 1 / 30);
   assert.deepEqual(
     b.fighters.map((f) => f.hp),
-    [74, 74],
+    [75.3, 75.3],
   );
   assert.deepEqual(
     b.fighters.map((f) => f.meter),
@@ -169,7 +171,7 @@ test("movement is independent of which fighter is processed first", () => {
 });
 
 test("simultaneous lethal punches end in a draw for either host assignment", () => {
-  const b = createBout(["host", "guest"], ["stone", "stone"]);
+  const b = createBout(["host", "guest"], ["specs", "specs"]);
   b.countdown = 0;
   b.fighters[0].z = -0.5;
   b.fighters[1].z = 0.5;

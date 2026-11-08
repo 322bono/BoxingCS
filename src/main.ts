@@ -30,10 +30,16 @@ const esc = (v: string) =>
   );
 const icon = (name: string) =>
   ({ arrow: "↗", glove: "◉", team: "⚑", ai: "✦" })[name] || name;
-let selected: CharacterId =
-  (localStorage.getItem("ring-character") as CharacterId) || "ace";
-if (!CHARACTERS.some((c) => c.id === selected)) selected = "ace";
+const savedCharacter = localStorage.getItem("ring-character");
+let selected: CharacterId = (savedCharacter as CharacterId) || "nova";
+if (!CHARACTERS.some((c) => c.id === selected)) selected = "nova";
+if (savedCharacter && savedCharacter !== selected)
+  localStorage.setItem("ring-character", selected);
 let characterPreview: CharacterPreview | null = null;
+let pickerContext: {
+  candidate: CharacterId;
+  continuation?: () => void;
+} | null = null;
 let toastTimer: ReturnType<typeof setTimeout>;
 let room: PublicRoom | null = null,
   myId = "",
@@ -300,6 +306,7 @@ function modal(o: string, e: string) {
 }
 let modalReturn: HTMLElement | null = null;
 function closeModal() {
+  pickerContext = null;
   (characterPreview?.dispose(),
     (characterPreview = null),
     (rebinding = null),
@@ -371,26 +378,6 @@ const signatures: Record<
   CharacterId,
   { name: string; tag: string; description: string }
 > = {
-  mint: {
-    name: "체크메이트",
-    tag: "PRECISION BREAK",
-    description: "가드를 뚫는 카운터",
-  },
-  ace: {
-    name: "플래시 임팩트",
-    tag: "FLASH IMPACT",
-    description: "빠르고 긴 스트레이트",
-  },
-  ink: {
-    name: "와일드 크래시",
-    tag: "WILD CRASH",
-    description: "가까이서 묵직한 훅",
-  },
-  stone: {
-    name: "아이언 피니시",
-    tag: "IRON FINISH",
-    description: "정면 어퍼컷",
-  },
   nova: {
     name: "화이트 러시",
     tag: "WHITE RUSH",
@@ -416,6 +403,7 @@ function openCharacter(id: CharacterId) {
   openCharacterPicker(undefined, id);
 }
 function fighterSelection(candidate: CharacterId, continuation?: () => void) {
+  pickerContext = { candidate, continuation };
   const unavailable =
     PENDING_MODEL_IDS.has(candidate) && !modelReady(candidate);
   const c = CHARACTERS.find((c) => c.id === candidate)!,
@@ -459,7 +447,7 @@ function fighterSelection(candidate: CharacterId, continuation?: () => void) {
       return;
     selected = candidate;
     localStorage.setItem("ring-character", selected);
-    world?.setCharacters(selected, selected === "ink" ? "ace" : "ink");
+    world?.setCharacters(selected, selected === "blaze" ? "nova" : "blaze");
     closeModal();
     gameAudio.play("select", { rate: 0.95 });
     if (continuation) continuation();
@@ -471,9 +459,9 @@ function startPractice() {
   room = null;
   myId = "local";
   view = 0;
-  const opponent = (CHARACTERS.find(
-    (c) => c.id !== selected && modelReady(c.id),
-  ) || CHARACTERS.find((c) => c.id !== selected))!.id;
+  const opponent =
+    CHARACTERS.find((c) => c.id !== selected && modelReady(c.id))?.id ||
+    selected;
   local = createBout(["local", "AI"], [selected, opponent]);
   input = idleInput();
   lastHp = [100, 100];
@@ -1055,6 +1043,8 @@ addEventListener("fighter-model-error", () =>
 );
 
 addEventListener("fighter-assets-ready", () => {
+  if (dialog === "fighter-select" && pickerContext)
+    fighterSelection(pickerContext.candidate, pickerContext.continuation);
   if (!localStorage.getItem("ring-character"))
     selected = CHARACTERS.find((c) => modelReady(c.id))?.id || selected;
   if (

@@ -119,7 +119,7 @@ export class Rooms {
       id: randomUUID(),
       token,
       name: name.trim().slice(0, 16) || "복서",
-      character: "stone",
+      character: "nova",
       team,
       ready: false,
       connected: true,

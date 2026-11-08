@@ -200,7 +200,7 @@ test("a browser with delayed 3D files holds the common countdown", async ({
           json: {
             version: 1,
             characters: {
-              ace: {
+              nova: {
                 status: "ready",
                 model: "/characters/models/synthetic.glb",
                 source: "test fixture",

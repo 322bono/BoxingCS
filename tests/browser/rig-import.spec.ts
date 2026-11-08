@@ -16,7 +16,7 @@ test("actual GLB parsing preserves the rig and attaches a playable instance", as
       json: {
         version: 1,
         characters: {
-          ace: {
+          nova: {
             status: "ready",
             model: "/characters/models/synthetic.glb",
             source: "synthetic test fixture",
@@ -36,20 +36,20 @@ test("actual GLB parsing preserves the rig and attaches a playable instance", as
     );
   });
   await page.goto("/");
-  await expect
-    .poll(() => page.evaluate(() => (window as any).loadedRigs), {
-      timeout: 10000,
-    })
-    .toContain("ace");
   await page.getByRole("button", { name: "AI 연습", exact: true }).click();
   await expect(page.locator("#character-stage canvas")).toBeVisible();
   await page.getByRole("button", { name: "스킬 시연", exact: true }).click();
   await page
-    .getByRole("button", { name: "모스 미리보기", exact: true })
+    .getByRole("button", { name: "노바 미리보기", exact: true })
     .click();
   await page.getByRole("button", { name: "이 파이터로 계속" }).click();
   await page.getByLabel("닉네임").fill("rig-test");
   await page.getByRole("button", { name: "연습 시작" }).click();
+  await expect
+    .poll(() => page.evaluate(() => (window as any).loadedRigs), {
+      timeout: 10000,
+    })
+    .toContain("nova");
   await expect(page.locator("#hud")).toBeVisible();
   await page.waitForTimeout(1200);
   expect(warnings).toEqual([]);

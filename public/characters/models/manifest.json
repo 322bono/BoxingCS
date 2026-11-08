@@ -1,34 +1,6 @@
 {
   "version": 1,
   "characters": {
-    "mint": {
-      "status": "pending",
-      "model": null,
-      "source": "Original photo unavailable in workspace; temporary model in use",
-      "taskId": null,
-      "referencePhoto": null
-    },
-    "ace": {
-      "status": "pending",
-      "model": null,
-      "source": "Original photo unavailable in workspace; temporary model in use",
-      "taskId": null,
-      "referencePhoto": null
-    },
-    "ink": {
-      "status": "pending",
-      "model": null,
-      "source": "Original photo unavailable in workspace; temporary model in use",
-      "taskId": null,
-      "referencePhoto": null
-    },
-    "stone": {
-      "status": "pending",
-      "model": null,
-      "source": "Original photo unavailable in workspace; temporary model in use",
-      "taskId": null,
-      "referencePhoto": null
-    },
     "nova": {
       "status": "ready",
       "model": "/characters/models/nova-hd.glb",

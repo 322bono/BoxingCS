@@ -50,7 +50,7 @@ export class World {
   private cameraMotion = new CombatCameraMotion();
   private cameraViewKey = "";
   textures = new Map<string, THREE.Texture>();
-  models: CharacterId[] = ["ace", "ink"];
+  models: CharacterId[] = ["nova", "blaze"];
   impactUntil = 0;
   freezeUntil = 0;
   impactStrength = 0;
@@ -59,7 +59,7 @@ export class World {
   private charactersReady: Promise<boolean> = Promise.resolve(false);
   activeBoutId = "";
   lastFrame = performance.now();
-  previewState = createBout(["preview-a", "preview-b"], ["ace", "ink"]);
+  previewState = createBout(["preview-a", "preview-b"], ["nova", "blaze"]);
   onError: () => void;
   constructor(container: HTMLElement, onError: () => void) {
     this.onError = onError;
@@ -101,7 +101,9 @@ export class World {
     this.scene.add(this.camera);
     this.camera.add(this.gloves);
     this.gloves.visible = false;
-    this.setCharacters("ace", "ink");
+    // Keep hidden-menu initialization light; real rigs load on selection/fight.
+    this.fighters = [this.model("nova", 0), this.model("blaze", 1)];
+    this.scene.add(...this.fighters);
     new ResizeObserver(() => this.resize()).observe(container);
     this.resize();
     this.renderer.domElement.addEventListener("webglcontextlost", (e) => {
@@ -280,23 +282,17 @@ export class World {
       [1, 1, 1],
     );
     face.rotation.x = -0.01;
-    if (id !== "stone") {
-      const hm = skin(id === "ink" ? "#a19b84" : "#242621");
-      part(g, geo.sphere, hm, [0, 2.075, -0.025], [0.267, 0.16, 0.25]);
-      if (id === "mint") {
-        for (const side of [-1, 1])
-          part(g, geo.box, hm, [side * 0.235, 1.89, -0.05], [0.11, 0.46, 0.31]);
-      } else
-        for (let j = 0; j < 7; j++) {
-          const tuft = part(
-            g,
-            geo.sphere,
-            hm,
-            [(j - 3) * 0.065, 2.18 + Math.sin(j * 9) * 0.035, 0.015],
-            [0.085, 0.11, 0.11],
-          );
-          tuft.rotation.z = j * 0.4;
-        }
+    const hair = skin("#242621");
+    part(g, geo.sphere, hair, [0, 2.075, -0.025], [0.267, 0.16, 0.25]);
+    for (let j = 0; j < 7; j++) {
+      const tuft = part(
+        g,
+        geo.sphere,
+        hair,
+        [(j - 3) * 0.065, 2.18 + Math.sin(j * 9) * 0.035, 0.015],
+        [0.085, 0.11, 0.11],
+      );
+      tuft.rotation.z = j * 0.4;
     }
     part(g, geo.sphere, dark, [0, 0.79, 0], [0.32, 0.22, 0.22]);
     part(
@@ -343,7 +339,12 @@ export class World {
     return g;
   }
   setCharacters(a: CharacterId, b: CharacterId) {
-    if (this.fighters.length && this.models[0] === a && this.models[1] === b)
+    if (
+      this.assetRevision > 0 &&
+      this.fighters.length &&
+      this.models[0] === a &&
+      this.models[1] === b
+    )
       return this.charactersReady;
     this.models = [a, b];
     for (const f of this.fighters) {

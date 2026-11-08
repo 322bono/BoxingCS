@@ -69,7 +69,7 @@ test("menu music unlocks, persists its mute preference, and pauses for recorded 
   await page.getByRole("button", { name: "닫기", exact: true }).click();
   await page.getByRole("button", { name: "AI 연습", exact: true }).click();
   await page
-    .getByRole("button", { name: "모스 미리보기", exact: true })
+    .getByRole("button", { name: "노바 미리보기", exact: true })
     .click();
   await page.getByRole("button", { name: "이 파이터로 계속" }).click();
   await page.getByLabel("닉네임").fill("사운드테스트");

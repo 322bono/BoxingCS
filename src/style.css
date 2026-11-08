@@ -2649,10 +2649,10 @@ input:not([type="radio"]):not([type="checkbox"]) {
 .select-roster button img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 32%;
+  object-fit: contain;
+  object-position: center;
   opacity: 0.65;
-  transform: skew(8deg) scale(1.14);
+  transform: skew(8deg) scale(1.04);
 }
 .select-roster button.active {
   border: 3px solid #ff3c5b;
@@ -3380,7 +3380,7 @@ input:not([type="radio"]):not([type="checkbox"]) {
   }
 }
 .select-roster {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .model-status {
   border-left: 2px solid #f6ca57;

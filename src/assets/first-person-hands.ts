@@ -89,24 +89,16 @@ export class FirstPersonHands {
             case "nova":
               extension = pulse(progress, i === 0 ? 0.23 : 0.56, 0.24);
               break;
-            case "ace":
-              extension = pulse(progress, i === 0 ? 0.34 : 0.65, 0.3);
-              break;
             case "volt":
-            case "stone":
               extension = i === 1 ? Math.sin(Math.PI * progress) : 0;
               arc = "uppercut";
               break;
             case "blaze":
-            case "ink":
               extension = i === 1 ? Math.sin(Math.PI * progress) : 0;
               arc = "overhand";
               break;
             case "specs":
               extension = i === 1 ? pulse(progress, 0.63, 0.34) : 0;
-              break;
-            case "mint":
-              extension = i === 0 ? pulse(progress, 0.58, 0.36) : 0;
               break;
           }
         }
