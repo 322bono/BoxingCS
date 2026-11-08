@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <title>Audio integration fixture</title>
+  </head>
+  <body class="fighting">
+    <button id="unlock" style="position: fixed; z-index: 1000; top: 100px">
+      오디오 시작
+    </button>
+    <section id="hud">
+      <div class="fight-clock"><b id="clock">90</b></div>
+    </section>
+    <script type="module">
+      import { GameAudio } from "/src/audio/game-audio.ts";
+      import { createBout } from "/shared/game.ts";
+      import { updateMatchTension } from "/src/match-hud.ts";
+      const audio = new GameAudio({ sound: true, music: true, crowd: 0.7 });
+      const bout = createBout(["one", "two"], ["nova", "blaze"]);
+      bout.countdown = 0;
+      audio.setScene("fight");
+      const observe = (paused = false, effects = true) => {
+        const frame = audio.observeCombat(bout, 0, paused);
+        document.querySelector("#clock").textContent = String(
+          Math.ceil(bout.time),
+        );
+        updateMatchTension(document.querySelector("#hud"), frame, effects);
+        return frame;
+      };
+      window.audioHarness = { audio, bout, observe };
+      document.querySelector("#unlock").onclick = () => {
+        audio.unlock();
+        observe();
+      };
+    </script>
+  </body>
+</html>

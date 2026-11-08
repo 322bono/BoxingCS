@@ -15,6 +15,7 @@ import type { Room, Player } from "../server/rooms";
 import { World } from "./world";
 import { CharacterPreview } from "./assets/preview";
 import { GameAudio } from "./audio/game-audio";
+import { updateMatchTension } from "./match-hud";
 import { modelEntries } from "./assets/library";
 type PublicRoom = Omit<Room, "players"> & { players: Omit<Player, "token">[] };
 const $ = <T extends HTMLElement = HTMLElement>(q: string) =>
@@ -77,6 +78,12 @@ const settings = {
   sound: localStorage.getItem("ring-sound") !== "off",
   music: localStorage.getItem("ring-music") !== "off",
   shake: localStorage.getItem("ring-shake") !== "off",
+  crowd: (() => {
+    const saved = Number(localStorage.getItem("ring-crowd") ?? "70");
+    return Number.isFinite(saved)
+      ? Math.max(0, Math.min(100, saved)) / 100
+      : 0.7;
+  })(),
 };
 document.body.classList.add("booting");
 $("#app").innerHTML =
@@ -677,7 +684,15 @@ let lastHp = [100, 100],
 function updateHud() {
   const b = local || room?.bout;
   if (!b || !$("#hud")) return;
-  gameAudio.observeCombat(b, view);
+  const arena = gameAudio.observeCombat(
+    b,
+    view,
+    !!room &&
+      (!online ||
+        !!room.sync?.deadline ||
+        room.players.some((p) => !p.connected)),
+  );
+  updateMatchTension($("#hud"), arena, settings.shake);
   const own = b.fighters[view],
     other = b.fighters[1 - view];
   for (const [i, f] of [own, other].entries()) {
@@ -810,7 +825,7 @@ function help() {
 }
 function openSettings() {
   modal(
-    `<p class="eyebrow">MAKE IT YOURS</p><h2 id="dialog-title">클럽 설정.</h2><label class="setting-row">효과음<input id="sound" type="checkbox" ${settings.sound ? "checked" : ""}/></label><label class="setting-row">배경음악<input id="music" type="checkbox" ${settings.music ? "checked" : ""}/></label><label class="setting-row">피격 화면 효과<input id="shake" type="checkbox" ${settings.shake ? "checked" : ""}/></label><div class="key-settings"><p>키 설정 <small>버튼을 누른 다음 새 키를 입력하세요.</small></p>${[
+    `<p class="eyebrow">MAKE IT YOURS</p><h2 id="dialog-title">클럽 설정.</h2><label class="setting-row">효과음<input id="sound" type="checkbox" ${settings.sound ? "checked" : ""}/></label><label class="setting-row">배경음악<input id="music" type="checkbox" ${settings.music ? "checked" : ""}/></label><div class="setting-row crowd-setting"><label for="crowd-volume">관중 환호 <small id="crowd-level">${Math.round(settings.crowd * 100)}%</small></label><input id="crowd-volume" aria-label="관중 환호 음량" type="range" min="0" max="100" step="5" value="${Math.round(settings.crowd * 100)}"/></div><label class="setting-row">피격 화면 효과<input id="shake" type="checkbox" ${settings.shake ? "checked" : ""}/></label><div class="key-settings"><p>키 설정 <small>버튼을 누른 다음 새 키를 입력하세요.</small></p>${[
       ["w", "앞으로"],
       ["s", "뒤로"],
       ["a", "왼쪽"],
@@ -849,6 +864,15 @@ function openSettings() {
   };
   $<HTMLInputElement>("#music").onchange = (e) =>
     setMenuMusic((e.target as HTMLInputElement).checked);
+  $<HTMLInputElement>("#crowd-volume").oninput = (e) => {
+    settings.crowd = Number((e.target as HTMLInputElement).value) / 100;
+    localStorage.setItem(
+      "ring-crowd",
+      String(Math.round(settings.crowd * 100)),
+    );
+    $("#crowd-level").textContent = `${Math.round(settings.crowd * 100)}%`;
+    gameAudio.setCrowdVolume(settings.crowd);
+  };
   $<HTMLInputElement>("#shake").onchange = (e) => {
     settings.shake = (e.target as HTMLInputElement).checked;
     if (world) world.shake = settings.shake;

@@ -23,3 +23,18 @@ https://commons.wikimedia.org/wiki/File:Dingdingding.wav
 Effects converted to 44.1 kHz mono PCM WAV, leading silence trimmed,
 peaks adjusted, and short fades applied. Original sources retained privately.
 CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+Recorded crowd audio — CC0 1.0 Universal
+
+Arena bed: “Crowd Talking Quietly Stadium.mp3” by FunWithSound
+https://freesound.org/people/FunWithSound/sounds/381373/
+Arena cheer: “small crowd cheering” by HowardV
+https://freesound.org/people/HowardV/sounds/264377/
+Arena roar: “Crowd Cheer” by FoolBoyMedia
+https://freesound.org/people/FoolBoyMedia/sounds/397434/
+
+License for all three: https://creativecommons.org/publicdomain/zero/1.0/
+Sources are preserved high-quality MP3 previews published on the official Freesound pages.
+Edited for gameplay: trimming, equalization, compression where documented, fades/circular crossfade and peak normalization.
+See docs/crowd-audio-assets.json for source URLs, hashes and transforms. Original sources and source-page snapshots are retained privately.
+Attribution is supplied voluntarily; CC0 does not require it.

@@ -868,6 +868,18 @@ kbd {
   width: 20px;
   height: 20px;
 }
+.crowd-setting {
+  align-items: center;
+  gap: 16px;
+}
+.crowd-setting small {
+  margin-left: 8px;
+  color: #9aa7bf;
+  font-variant-numeric: tabular-nums;
+}
+.crowd-setting input[type="range"] {
+  width: min(48%, 220px);
+}
 #toast {
   position: fixed;
   bottom: 30px;
@@ -1231,6 +1243,33 @@ body.fighting {
     transparent 80%,
     #10181b6b
   );
+  box-shadow: inset 0 0 clamp(55px, 10vw, 130px)
+    rgb(205 37 62 / calc(var(--danger, 0) * 0.45));
+  transition: box-shadow 0.4s ease;
+}
+#hud.closing-round #clock {
+  color: #f7b85d;
+}
+#hud.final-round #clock {
+  color: #ff6e73;
+  text-shadow: 0 0 18px #e43c5559;
+  animation: final-seconds 0.9s ease-in-out infinite;
+}
+@keyframes final-seconds {
+  50% {
+    transform: scale(1.06);
+  }
+}
+#hud.reduced-effects #clock {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #hud.final-round #clock {
+    animation: none;
+  }
+  #hud {
+    transition: none;
+  }
 }
 .fight-top {
   display: grid;

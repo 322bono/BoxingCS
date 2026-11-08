@@ -1,5 +1,6 @@
 import type { Bout } from "../../shared/game";
 import { CombatSoundTracker, type CombatSoundCue } from "./combat-sounds";
+import { MatchAtmosphereTracker, type ArenaFrame } from "./match-atmosphere";
 export type AudioScene = "menu" | "lobby" | "fight" | "result";
 const files = {
   punch: ["punch-1", "punch-2", "punch-3"],
@@ -14,6 +15,9 @@ const files = {
   "bell-end": ["bell-end"],
   fall: ["fall"],
   select: ["select"],
+  "crowd-cheer": ["arena-cheer"],
+  "crowd-roar": ["arena-roar"],
+  "crowd-finish": ["arena-roar"],
 } as const;
 type Sound = keyof typeof files;
 const levels: Record<Sound, { gain: number; rate: number }> = {
@@ -29,12 +33,27 @@ const levels: Record<Sound, { gain: number; rate: number }> = {
   "bell-end": { gain: 0.5, rate: 1 },
   fall: { gain: 0.65, rate: 0.85 },
   select: { gain: 0.2, rate: 1 },
+  "crowd-cheer": { gain: 0.6, rate: 1 },
+  "crowd-roar": { gain: 0.9, rate: 1 },
+  "crowd-finish": { gain: 0.95, rate: 1 },
 };
 export class GameAudio {
   private context: AudioContext | null = null;
   private musicGain: GainNode | null = null;
   private effectsGain: GainNode | null = null;
   private compressor: DynamicsCompressorNode | null = null;
+  private crowdGain: GainNode | null = null;
+  private crowdLoop: AudioBufferSourceNode | null = null;
+  private crowdLoopGain: GainNode | null = null;
+  private crowdGeneration = 0;
+  private crowdPending: number | null = null;
+  private crowdVoices = new Map<
+    AudioBufferSourceNode,
+    { sound: Sound; gain: GainNode }
+  >();
+  private crowdVolume: number;
+  private crowdDuckUntil = 0;
+  private duckTimer: ReturnType<typeof setTimeout> | undefined;
   private buffers = new Map<string, AudioBuffer>();
   private loading = new Map<string, Promise<AudioBuffer>>();
   private voices = new Set<AudioBufferSourceNode>();
@@ -46,10 +65,18 @@ export class GameAudio {
   private musicEnabled: boolean;
   private pauseTimer: ReturnType<typeof setTimeout> | undefined;
   private tracker = new CombatSoundTracker();
+  private atmosphere = new MatchAtmosphereTracker();
+  private arena: ArenaFrame | null = null;
+  private combatKey = "";
+  private combatGeneration = 0;
+  private crowdCueGeneration = 0;
   readonly music: HTMLAudioElement;
-  constructor(preferences: { sound: boolean; music: boolean }) {
+  constructor(preferences: { sound: boolean; music: boolean; crowd?: number }) {
     this.effectsEnabled = preferences.sound;
     this.musicEnabled = preferences.music;
+    this.crowdVolume = Number.isFinite(preferences.crowd)
+      ? Math.max(0, Math.min(1, preferences.crowd!))
+      : 0.7;
     const previous = document.getElementById("menu-music");
     if (previous instanceof HTMLMediaElement) {
       previous.pause();
@@ -99,24 +126,49 @@ export class GameAudio {
         this.effectsGain
           .connect(this.compressor)
           .connect(this.context.destination);
-        for (const file of new Set(Object.values(files).flat()))
+        this.crowdGain = this.context.createGain();
+        this.crowdGain.gain.value = this.crowdVolume;
+        this.crowdGain.connect(this.effectsGain);
+        for (const file of new Set(
+          Object.entries(files)
+            .filter(([sound]) => !sound.startsWith("crowd-"))
+            .flatMap(([, list]) => list),
+        ))
           void this.load(file).catch(() => {});
+        if (this.scene === "fight") this.preloadCrowd();
       }
       void this.context
         .resume()
-        .then(() => this.syncMusic())
+        .then(() => {
+          this.syncMusic();
+          this.syncCrowd();
+        })
         .catch(() => {});
       this.syncMusic();
+      this.syncCrowd();
     } catch {
       /* A later user gesture can retry browser audio activation. */
     }
   }
   setScene(scene: AudioScene) {
     if (scene === this.scene) return;
+    if (scene === "result" && this.scene === "fight" && this.arena?.active)
+      this.play("crowd-finish", { delay: 0.25 });
     this.scene = scene;
     this.sceneEpoch++;
-    if (scene !== "fight") this.tracker.reset();
+    if (scene !== "fight") {
+      if (scene !== "result") {
+        this.combatGeneration++;
+        this.crowdCueGeneration++;
+      }
+      this.tracker.reset();
+      this.atmosphere.reset();
+      this.arena = null;
+      this.combatKey = "";
+      this.stopCrowdReactions(scene === "result");
+    } else this.preloadCrowd();
     this.syncMusic();
+    this.syncCrowd();
   }
   setMusicEnabled(enabled: boolean) {
     this.musicEnabled = enabled;
@@ -130,13 +182,144 @@ export class GameAudio {
         this.context.currentTime,
         0.01,
       );
-    if (!enabled) this.stopVoices();
+    if (!enabled) {
+      this.sceneEpoch++;
+      this.crowdCueGeneration++;
+      this.stopVoices();
+    }
+    this.syncCrowd();
+  }
+  setCrowdVolume(value: number) {
+    this.crowdVolume = Number.isFinite(value)
+      ? Math.max(0, Math.min(1, value))
+      : 0.7;
+    if (!this.crowdVolume) {
+      this.crowdCueGeneration++;
+      this.stopCrowdReactions();
+    } else if (this.scene === "fight") this.preloadCrowd();
+    this.syncCrowd();
+  }
+  private preloadCrowd() {
+    if (!this.context || !this.crowdVolume) return;
+    for (const file of ["arena-bed", "arena-cheer", "arena-roar"])
+      void this.load(file).catch(() => {});
+  }
+  private applyCrowdLevel() {
+    if (!this.context || !this.crowdGain) return;
+    const ducked = this.context.currentTime < this.crowdDuckUntil;
+    const level =
+      this.effectsEnabled && this.visible
+        ? this.crowdVolume * (ducked ? 0.42 : 1)
+        : 0;
+    this.crowdGain.gain.setTargetAtTime(
+      level,
+      this.context.currentTime,
+      ducked ? 0.008 : 0.08,
+    );
+  }
+  private duckCrowd() {
+    if (!this.context) return;
+    this.crowdDuckUntil = this.context.currentTime + 0.14;
+    this.applyCrowdLevel();
+    clearTimeout(this.duckTimer);
+    this.duckTimer = setTimeout(() => this.applyCrowdLevel(), 160);
+  }
+  private wantsCrowd() {
+    return !!(
+      this.context?.state === "running" &&
+      this.scene === "fight" &&
+      this.arena?.active &&
+      this.visible &&
+      this.effectsEnabled &&
+      this.crowdVolume > 0
+    );
+  }
+  private syncCrowd() {
+    this.applyCrowdLevel();
+    if (!this.wantsCrowd()) {
+      this.stopCrowdLoop();
+      return;
+    }
+    const gain = 0.8 + (this.arena?.energy || 0) * 1.1;
+    if (this.crowdLoopGain && this.context)
+      this.crowdLoopGain.gain.setTargetAtTime(
+        gain,
+        this.context.currentTime,
+        0.3,
+      );
+    if (this.crowdLoop || this.crowdPending === this.crowdGeneration) return;
+    const generation = this.crowdGeneration;
+    this.crowdPending = generation;
+    void this.load("arena-bed")
+      .then((buffer) => {
+        if (
+          generation !== this.crowdGeneration ||
+          !this.wantsCrowd() ||
+          this.crowdLoop ||
+          !this.context ||
+          !this.crowdGain
+        )
+          return;
+        const context = this.context,
+          source = context.createBufferSource(),
+          level = context.createGain();
+        source.buffer = buffer;
+        source.loop = true;
+        level.gain.value = 0;
+        level.gain.setTargetAtTime(
+          0.8 + (this.arena?.energy || 0) * 1.1,
+          context.currentTime,
+          0.4,
+        );
+        source.connect(level).connect(this.crowdGain);
+        this.crowdLoop = source;
+        this.crowdLoopGain = level;
+        source.onended = () => {
+          source.disconnect();
+          level.disconnect();
+        };
+        source.start();
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (this.crowdPending === generation) this.crowdPending = null;
+      });
+  }
+  private stopCrowdLoop() {
+    this.crowdGeneration++;
+    const source = this.crowdLoop,
+      gain = this.crowdLoopGain,
+      context = this.context;
+    this.crowdLoop = null;
+    this.crowdLoopGain = null;
+    if (!source || !gain || !context) return;
+    gain.gain.cancelScheduledValues(context.currentTime);
+    gain.gain.setTargetAtTime(0, context.currentTime, 0.02);
+    try {
+      source.stop(context.currentTime + 0.1);
+    } catch {}
+  }
+  private stopCrowdReactions(keepFinish = false) {
+    for (const [source, info] of this.crowdVoices) {
+      if (keepFinish && info.sound === "crowd-finish") continue;
+      if (this.context) {
+        info.gain.gain.cancelScheduledValues(this.context.currentTime);
+        info.gain.gain.setTargetAtTime(0, this.context.currentTime, 0.01);
+      }
+      try {
+        source.stop((this.context?.currentTime || 0) + 0.05);
+      } catch {}
+      this.crowdVoices.delete(source);
+    }
   }
   private setVisible(visible: boolean) {
     if (visible === this.visible) return;
     this.visible = visible;
     this.sceneEpoch++;
-    if (!visible) this.stopVoices();
+    if (!visible) {
+      this.crowdCueGeneration++;
+      this.stopVoices();
+    }
     if (this.context && this.effectsGain)
       this.effectsGain.gain.setTargetAtTime(
         this.effectsEnabled && visible ? 0.8 : 0,
@@ -146,9 +329,13 @@ export class GameAudio {
     if (visible && this.context)
       void this.context
         .resume()
-        .then(() => this.syncMusic())
+        .then(() => {
+          this.syncMusic();
+          this.syncCrowd();
+        })
         .catch(() => {});
     this.syncMusic(!visible);
+    this.syncCrowd();
   }
   private wantsMusic() {
     return this.musicEnabled && this.scene === "menu" && this.visible;
@@ -203,11 +390,13 @@ export class GameAudio {
       delay?: number;
     } = {},
   ) {
+    const crowd = sound.startsWith("crowd-");
     if (
       !this.effectsEnabled ||
       !this.visible ||
       !this.context ||
-      this.context.state !== "running"
+      this.context.state !== "running" ||
+      (crowd && !this.crowdVolume)
     )
       return;
     const count = this.counts.get(sound) || 0;
@@ -215,15 +404,25 @@ export class GameAudio {
     const variants = files[sound],
       file = variants[count % variants.length];
     const epoch = this.sceneEpoch;
+    const combatGeneration = this.combatGeneration;
+    const crowdGeneration = crowd
+      ? ++this.crowdCueGeneration
+      : this.crowdCueGeneration;
     const start = (buffer: AudioBuffer) => {
       const tail =
-        (sound === "bell-end" || sound === "fall") && this.scene === "result";
+        (sound === "bell-end" ||
+          sound === "fall" ||
+          sound === "crowd-finish") &&
+        this.scene === "result" &&
+        combatGeneration === this.combatGeneration;
       if (
         (!tail && epoch !== this.sceneEpoch) ||
         !this.effectsEnabled ||
         !this.visible ||
         !this.context ||
-        !this.effectsGain
+        !this.effectsGain ||
+        (crowd &&
+          (!this.crowdVolume || crowdGeneration !== this.crowdCueGeneration))
       )
         return;
       const context = this.context,
@@ -241,7 +440,10 @@ export class GameAudio {
       gain.gain.value = levels[sound].gain * (options.gain ?? 1);
       pan.pan.value =
         options.pan ?? (sound === "step" ? (count % 2 ? 0.13 : -0.13) : 0);
-      source.connect(gain).connect(pan).connect(this.effectsGain);
+      source
+        .connect(gain)
+        .connect(pan)
+        .connect(crowd && this.crowdGain ? this.crowdGain : this.effectsGain);
       while (this.voices.size >= 10) {
         const oldest = this.voices.values().next().value;
         if (!oldest) break;
@@ -251,8 +453,10 @@ export class GameAudio {
         } catch {}
       }
       this.voices.add(source);
+      if (crowd) this.crowdVoices.set(source, { sound, gain });
       source.onended = () => {
         this.voices.delete(source);
+        this.crowdVoices.delete(source);
         source.disconnect();
         gain.disconnect();
         pan.disconnect();
@@ -266,12 +470,43 @@ export class GameAudio {
         .then(start)
         .catch(() => {});
   }
-  observeCombat(bout: Bout, view: number) {
-    for (const cue of this.tracker.update(bout, view)) {
-      if (this.scene === "fight") this.playCue(cue);
+  observeCombat(bout: Bout, view: number, paused = false): ArenaFrame {
+    // Finished room snapshots must not cancel the celebration retained by setScene.
+    if (this.scene !== "fight") return this.atmosphere.update(bout, view, true);
+    const key = `${bout.id}:${view}:${paused}`;
+    if (key !== this.combatKey) {
+      this.combatGeneration++;
+      this.crowdCueGeneration++;
+      this.combatKey = key;
+      this.sceneEpoch++;
+      this.tracker.reset();
+      this.atmosphere.reset();
+      this.stopCrowdLoop();
+      this.stopCrowdReactions();
     }
+    for (const cue of this.tracker.update(bout, view)) {
+      if (this.scene === "fight" && !paused) this.playCue(cue);
+    }
+    this.arena = this.atmosphere.update(
+      bout,
+      view,
+      paused || this.scene !== "fight",
+    );
+    if (this.scene === "fight" && this.arena.reaction) {
+      this.stopCrowdReactions();
+      this.play(`crowd-${this.arena.reaction}`, {
+        delay: this.arena.reaction === "finish" ? 0.35 : 0.12,
+      });
+    }
+    if (this.scene === "fight" && this.arena.warning) {
+      this.play("bell-start", { gain: 0.4, rate: 1.4 });
+      this.play("bell-start", { gain: 0.3, rate: 1.5, delay: 0.16 });
+    }
+    this.syncCrowd();
+    return this.arena;
   }
   private playCue(cue: CombatSoundCue) {
+    if (["punch", "heavy", "skill"].includes(cue.sound)) this.duckCrowd();
     if (cue.sound === "skill") {
       const beats =
         cue.character === "nova"
@@ -294,5 +529,6 @@ export class GameAudio {
       } catch {}
     }
     this.voices.clear();
+    this.crowdVoices.clear();
   }
 }
