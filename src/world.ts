@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { FighterLibrary, modelEntries } from "./assets/library";
 import { RigController } from "./assets/rig";
+import { createBoxingGlove } from "./assets/boxing-glove";
+import { FirstPersonHands } from "./assets/first-person-hands";
+import { CombatCameraMotion } from "./combat-camera";
 import { createBout } from "../shared/game";
 import {
   CHARACTERS,
@@ -42,8 +45,10 @@ export class World {
   shake = true;
   reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   fighters: THREE.Group[] = [];
-  gloves = new THREE.Group();
-  hands: THREE.Group[] = [];
+  handRig = new FirstPersonHands();
+  gloves = this.handRig.root;
+  private cameraMotion = new CombatCameraMotion();
+  private cameraViewKey = "";
   textures = new Map<string, THREE.Texture>();
   models: CharacterId[] = ["ace", "ink"];
   impactUntil = 0;
@@ -95,39 +100,6 @@ export class World {
     this.buildRing();
     this.scene.add(this.camera);
     this.camera.add(this.gloves);
-    for (let i = 0; i < 2; i++) {
-      const h = new THREE.Group();
-      part(
-        h,
-        geo.cylinder,
-        skin("#c89478"),
-        [0, -0.23, 0.14],
-        [0.095, 0.5, 0.095],
-      );
-      const glove = part(
-        h,
-        geo.sphere,
-        new THREE.MeshStandardMaterial({
-          color: "#e44538",
-          roughness: 0.3,
-          metalness: 0.08,
-        }),
-        [0, 0, 0],
-        [0.15, 0.18, 0.22],
-      );
-      glove.rotation.x = -0.2;
-      part(
-        h,
-        geo.cylinder,
-        skin("#e7e5d8"),
-        [0, -0.16, 0.08],
-        [0.115, 0.1, 0.115],
-      );
-      part(h, geo.box, skin("#171b1e"), [0, -0.15, -0.03], [0.1, 0.045, 0.012]);
-      h.scale.setScalar(0.82);
-      this.gloves.add(h);
-      this.hands.push(h);
-    }
     this.gloves.visible = false;
     this.setCharacters("ace", "ink");
     new ResizeObserver(() => this.resize()).observe(container);
@@ -277,11 +249,7 @@ export class World {
     const g = new THREE.Group();
     const s = skin(c.skin),
       jersey = skin(c.color),
-      dark = skin("#20282a"),
-      red = new THREE.MeshStandardMaterial({
-        color: team === 0 ? "#d84135" : "#41667f",
-        roughness: 0.35,
-      });
+      dark = skin("#20282a");
     part(g, geo.sphere, jersey, [0, 1.15, 0], [0.34, 0.43, 0.23]);
     part(g, geo.cylinder, s, [0, 1.58, 0], [0.1, 0.22, 0.1]);
     part(g, geo.sphere, s, [0, 1.88, 0], [0.255, 0.31, 0.24]);
@@ -365,14 +333,10 @@ export class World {
         [0.09, 0.34, 0.09],
       );
       fore.rotation.x = -0.7;
-      part(arm, geo.sphere, red, [side * 0.08, 0.08, 0.32], [0.15, 0.17, 0.2]);
-      part(
-        arm,
-        geo.cylinder,
-        skin("#e7e2d5"),
-        [side * 0.08, -0.04, 0.25],
-        [0.115, 0.08, 0.1],
-      );
+      const glove = createBoxingGlove(side as -1 | 1, team);
+      glove.position.set(side * 0.08, -0.03, 0.25);
+      glove.rotation.x = Math.PI / 4;
+      arm.add(glove);
       g.add(arm);
       g.userData[side < 0 ? "left" : "right"] = arm;
     }
@@ -447,6 +411,8 @@ export class World {
     return this.charactersReady;
   }
   menu() {
+    this.cameraMotion.reset();
+    this.cameraViewKey = "";
     if (this.activeBoutId) {
       for (const fighter of this.fighters) {
         (fighter.userData.rigController as RigController | undefined)?.reset();
@@ -526,40 +492,34 @@ export class World {
         0.4,
       );
       this.camera.lookAt(op.x, 1.9, op.z);
+      const viewKey = `${b.id}:${this.viewIndex}`;
+      if (viewKey !== this.cameraViewKey) {
+        this.cameraViewKey = viewKey;
+        this.cameraMotion.reset();
+      }
+      const motion = this.cameraMotion.update(
+        own,
+        op,
+        dt,
+        this.shake && !this.reduced && !b.ended && b.countdown <= 0,
+      );
+      this.camera.translateX(motion.x);
+      this.camera.position.y += motion.y;
+      this.camera.rotation.x += motion.pitch;
+      this.camera.rotation.z += motion.roll;
       if (now < this.impactUntil) {
         const amount = ((this.impactUntil - now) / 220) * this.impactStrength;
         this.camera.rotation.z += Math.sin(now * 0.11) * 0.025 * amount;
         this.camera.position.y += Math.sin(now * 0.09) * 0.03 * amount;
       }
       this.gloves.visible = !b.ended;
-      this.hands.forEach((h, i) => {
-        const active =
-          own.attack > 0 &&
-          (own.kind === "skill" || (own.kind === "hook" ? i === 1 : i === 0));
-        const p = active
-          ? Math.sin(
-              Math.min(
-                1,
-                own.attack /
-                  (own.kind === "skill"
-                    ? 0.6
-                    : own.kind === "hook"
-                      ? 0.34
-                      : 0.2),
-              ) * Math.PI,
-            )
-          : 0;
-        h.position.set(
-          (i === 0 ? -0.27 : 0.27) * (own.guard ? 0.6 : 1),
-          own.guard
-            ? -0.06
-            : -0.28 + (this.reduced ? 0 : Math.sin(t * 4 + i) * 0.009),
-          -0.68 - p * (own.kind === "skill" ? 0.48 : 0.25),
-        );
-        h.rotation.z =
-          (i === 0 ? 0.1 : -0.1) +
-          (own.kind === "hook" && active ? p * 0.7 : 0);
-      });
+      this.handRig.update(
+        own,
+        this.viewIndex,
+        this.camera.aspect,
+        t,
+        this.reduced,
+      );
     }
     this.renderer.render(this.scene, this.camera);
   }

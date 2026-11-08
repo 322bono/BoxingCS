@@ -259,6 +259,8 @@ export function disposeOwnedAccessories(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(),
     materials = new Set<THREE.Material>();
   root.traverse((object) => {
+    if (object instanceof THREE.Mesh && object.userData.ownedHandGeometry)
+      geometries.add(object.geometry);
     if (object instanceof THREE.Mesh && object.userData.ownedAccessory) {
       geometries.add(object.geometry);
       for (const material of Array.isArray(object.material)

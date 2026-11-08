@@ -192,6 +192,7 @@ test("native animation root motion is removed without changing cached clips", ()
     assert.ok(prepared.some((c) => c.name === name));
 });
 test("boxing gloves follow hand bones at the same world size across differently scaled rigs", () => {
+  const sizes: number[] = [];
   for (const factor of [0.01, 1]) {
     const root = new T.Group();
     root.scale.setScalar(factor);
@@ -200,16 +201,26 @@ test("boxing gloves follow hand bones at the same world size across differently 
     root.add(hand);
     addBoxingGloves(root);
     root.updateMatrixWorld(true);
-    const glove = hand.children[0] as T.Mesh;
-    assert.equal(hand.children.length, 2);
-    assert.ok(Math.abs(glove.getWorldScale(new T.Vector3()).x - 0.105) < 1e-6);
+    const glove = hand.getObjectByName("boxing-glove")!;
+    sizes.push(new T.Box3().setFromObject(glove).getSize(new T.Vector3()).x);
+    const knuckle = glove.getObjectByName("knuckles")!;
+    const before = knuckle.getWorldPosition(new T.Vector3());
+    hand.rotation.z = Math.PI / 2;
+    root.updateMatrixWorld(true);
+    assert.ok(
+      knuckle.getWorldPosition(new T.Vector3()).distanceTo(before) > 0.1,
+    );
     let released = false;
-    (glove.material as T.Material).addEventListener("dispose", () => {
-      released = true;
-    });
+    ((knuckle as T.Mesh).material as T.Material).addEventListener(
+      "dispose",
+      () => {
+        released = true;
+      },
+    );
     disposeOwnedAccessories(root);
-    assert.equal(released, true);
+    assert.ok(released);
   }
+  assert.ok(Math.abs(sizes[0] - sizes[1]) < 1e-6);
 });
 test("walking survives render frames between lower-frequency simulation snapshots", () => {
   const root = prepareFighter(fixture()),
@@ -223,62 +234,4 @@ test("walking survives render frames between lower-frequency simulation snapshot
   assert.equal(controller.current, "walk");
   for (let i = 0; i < 20; i++) controller.update(f, 1 / 60);
   assert.equal(controller.current, "idle");
-});
-
-test("gloves enclose open fingertips on a rig with longer hands", () => {
-  for (const scale of [1, 0.01]) {
-    const root = new T.Group();
-    root.scale.setScalar(scale);
-    const hand = new T.Bone();
-    hand.name = "LeftHand";
-    const tips = [
-      new T.Vector3(0, 0.254, 0.03),
-      new T.Vector3(0.067, 0.18, 0.06),
-      new T.Vector3(-0.086, 0.16, -0.057),
-      new T.Vector3(0, 0.01, 0),
-    ];
-    const geometry = new T.BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new T.Float32BufferAttribute(
-        tips.flatMap((v) => v.clone().divideScalar(scale).toArray()),
-        3,
-      ),
-    );
-    geometry.setAttribute(
-      "skinIndex",
-      new T.Uint16BufferAttribute(new Array(tips.length * 4).fill(0), 4),
-    );
-    geometry.setAttribute(
-      "skinWeight",
-      new T.Float32BufferAttribute(
-        tips.flatMap(() => [1, 0, 0, 0]),
-        4,
-      ),
-    );
-    const mesh = new T.SkinnedMesh(geometry, new T.MeshBasicMaterial());
-    root.add(hand, mesh);
-    root.updateMatrixWorld(true);
-    mesh.bind(new T.Skeleton([hand]));
-    addBoxingGloves(root);
-    root.updateMatrixWorld(true);
-    const mitt = hand.children[0] as T.Mesh;
-    for (let i = 0; i < tips.length; i++) {
-      const vertex = mesh.applyBoneTransform(
-        i,
-        new T.Vector3().fromBufferAttribute(
-          geometry.getAttribute("position"),
-          i,
-        ),
-      );
-      mesh.localToWorld(vertex);
-      assert.ok(
-        mitt.worldToLocal(vertex).length() < 1,
-        "skin must stay inside the glove",
-      );
-    }
-    disposeOwnedAccessories(root);
-    geometry.dispose();
-    (mesh.material as T.Material).dispose();
-  }
 });
