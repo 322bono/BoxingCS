@@ -38,7 +38,7 @@
 ## Verification
 
 - `npm test`:108 passing; `npm run build`: typecheck and production build pass.
--40 browser scenarios checked in focused groups: existing30, grappling/mobile9 and waiting-room music1. The existing run was interrupted after18 successes; its remaining12 then passed together. No source assets or uploaded music were replaced.
+-41 browser scenarios checked in focused groups: existing30, grappling/mobile9, waiting-room music1 and compact HUD overlap1. The existing run was interrupted after18 successes; its remaining12 then passed together. No source assets or uploaded music were replaced.
 - Real GLBs verified in both equipment variants; actual paired poses, first-person clearance and a grounded armbar inspected. Mobile checks include real touch drags/pinch, short keyboard-height dialogs, an eight-player lobby, landscape safe areas and independent two-finger input. Real iOS OS keyboard/address-bar behavior remains a device-check boundary.
 - Review findings fixed: independent pointer/keyboard holds, bottom-only positional escape to prevent top-player point farming, and disposal of copied hand geometry/materials without releasing shared textures.
 - A240-bout seeded grappling AI sample scored each style between41.3% and56.3% after counting draws as half a win. This is a regression sample, not a claim of human competitive balance.

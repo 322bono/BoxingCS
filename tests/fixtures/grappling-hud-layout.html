@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+  </head>
+  <body class="fighting">
+    <div id="app">
+      <div id="world"></div>
+      <main id="ui"></main>
+    </div>
+    <script type="module">
+      import "/src/style.css";
+      import "/src/ui/club.css";
+      import "/src/ui/grappling.css";
+      import "/src/ui/mobile.css";
+      import { installMobileViewport } from "/src/ui/mobile-viewport.ts";
+      import {
+        grapplingHudMarkup,
+        updateGrapplingHud,
+      } from "/src/ui/grappling-hud.ts";
+      import { createBout } from "/shared/game.ts";
+      installMobileViewport();
+      document.querySelector("#ui").innerHTML = grapplingHudMarkup(
+        false,
+        (key) => key,
+      );
+      const bout = createBout(["a", "b"], ["nova", "blaze"], "bjj");
+      bout.grappling.position = "guard";
+      bout.grappling.top = 1;
+      updateGrapplingHud(bout, 0, "first");
+      document.querySelector("#name-0").textContent = "PLAYER / 노바";
+      document.querySelector("#name-1").textContent = "PARTNER / 블레이즈";
+    </script>
+  </body>
+</html>
