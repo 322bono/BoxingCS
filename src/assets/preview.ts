@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { FighterLibrary } from "./library";
 import { RigController } from "./rig";
-import { createBout, type CharacterId } from "../../shared/game";
+import { applyGrapplingPreview } from "../grappling-world";
+import { createBout, type Sport, type CharacterId } from "../../shared/game";
 export class CharacterPreview {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
@@ -18,6 +19,7 @@ export class CharacterPreview {
     private element: HTMLElement,
     library: FighterLibrary,
     id: CharacterId,
+    private sport: Sport = "boxing",
   ) {
     this.state = createBout(["preview", "unused"], [id, id]).fighters[0];
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -61,7 +63,7 @@ export class CharacterPreview {
     this.observer.observe(this.element);
     this.resize();
     void library
-      .instantiate(id)
+      .instantiate(id, 0, sport)
       .then((model) => {
         if (!model) throw Error("3D 모델이 아직 준비되지 않았습니다.");
         if (this.stopped) {
@@ -81,8 +83,16 @@ export class CharacterPreview {
       this.last = now;
       if (this.root) {
         const controller = this.root.userData.rigController as RigController;
-        controller.update(this.state, dt);
-        this.element.dataset.animation = controller.current;
+        if (this.sport === "bjj") {
+          applyGrapplingPreview(this.root, now / 1000, this.state.attack > 0);
+          this.element.dataset.animation =
+            this.state.attack > 0
+              ? "grapple-skill-" + this.state.character
+              : "grapple-idle";
+        } else {
+          controller.update(this.state, dt);
+          this.element.dataset.animation = controller.current;
+        }
       }
       this.state.attack = Math.max(0, this.state.attack - dt);
       this.controls.update(dt);

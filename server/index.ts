@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Rooms } from "./rooms.ts";
-import { idleInput, type Input } from "../shared/game.ts";
+import { idleInput, type Input, type Sport } from "../shared/game.ts";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const app = express();
 const http = createServer(app);
@@ -67,6 +67,7 @@ io.on("connection", (s) => {
                 a.name,
                 a.mode as "duel" | "team",
                 a.size as number,
+                (a.sport ?? "boxing") as Sport,
               )
             : rooms.join(
                 typeof a.code === "string" ? a.code.trim().toUpperCase() : "",

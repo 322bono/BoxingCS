@@ -1,0 +1,1382 @@
+/* Live club menus. The world owns the backdrop; the interface lives at its edges. */
+.club-home,
+.club-lobby {
+  --club-text: #f3f0e8;
+  --club-muted: #aaa9a1;
+  --club-dim: #757974;
+  --club-accent: #dbb27b;
+  --club-accent-ink: #241e15;
+  --club-line: #eee6d51f;
+  --club-panel: #171b19b8;
+  color: var(--club-text);
+  font-family: "Club", Arial, "Noto Sans CJK KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.club-home[data-club-sport="bjj"],
+.club-lobby[data-club-sport="bjj"] {
+  --club-accent: #98b9a5;
+  --club-accent-ink: #14261d;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) {
+  background: #101513;
+  color: #f3f0e8;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) #app {
+  max-width: none;
+  min-height: 100svh;
+  overflow: hidden;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) #world {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  clip-path: none;
+  opacity: 1;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) #world::after {
+  display: none;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) #ui {
+  pointer-events: none;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .site-header {
+  display: flex;
+  height: 82px;
+  margin: 0 4.2%;
+  border-color: #ede5d21a;
+  background: transparent;
+  color: #f3f0e8;
+  gap: 28px;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .brand {
+  font-size: 16px;
+  gap: 10px;
+  letter-spacing: -0.4px;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .brand-mark {
+  width: 34px;
+  height: 34px;
+  color: #e9e1d2;
+  background: #e7dbbd14;
+  border: 1px solid #e4d7bb40;
+  transform: none;
+  font-size: 28px;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .brand-mark > span,
+body:has(#ui > :is(.club-home, .club-lobby)) .brand small {
+  display: none;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .brand-club {
+  display: inline;
+  margin-left: 5px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: #e9e1d2;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .site-header nav {
+  margin: 0 auto 0 50px;
+  gap: 28px;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .site-header nav button {
+  font-size: 12px;
+  font-weight: 500;
+  color: #a3a69e;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) nav .nav-active {
+  color: #f3f0e8;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) nav .nav-active::after {
+  background: #d6c1a0;
+  width: 15px;
+  height: 2px;
+  bottom: 6px;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) nav button span {
+  display: none;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .header-right {
+  gap: 22px;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .server-status {
+  color: #a3a69e;
+  font-size: 10px;
+  font-weight: 400;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .server-status i {
+  background: #91ad90;
+}
+body:has(#ui > :is(.club-home, .club-lobby)) .icon-button {
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 0 0 20px;
+  border-color: #e9e1d229;
+  color: #d0d1c7;
+  font-size: 21px;
+}
+.club-home.console-shell,
+.club-lobby.lobby {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  min-height: calc(100svh - 82px);
+  height: auto;
+  margin: 0;
+  padding: 44px 4.2% 26px;
+  isolation: isolate;
+  overflow: visible;
+  background: none;
+  pointer-events: none;
+}
+.club-home.console-shell::before,
+.club-lobby.lobby::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transform: none;
+  background:
+    linear-gradient(
+      90deg,
+      #101512f0 0%,
+      #101512cf 24%,
+      #10151265 43%,
+      #10151200 65%
+    ),
+    linear-gradient(0deg, #0e120ee8 0%, #0e120e00 30%);
+}
+.club-home.console-shell {
+  display: flex;
+  flex-direction: column;
+}
+.club-home-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(390px, 36vw);
+  min-height: 580px;
+  gap: 32px;
+}
+.club-sport-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--club-line);
+  border-radius: 3px;
+  background: #10161266;
+}
+.club-sport-switch button {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 130px;
+  padding: 9px 17px;
+  border: 1px solid transparent;
+  border-radius: 1px;
+  color: #a7aaa1;
+  font-size: 13px;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+.club-sport-switch button small {
+  color: inherit;
+  opacity: 0.65;
+  font-size: 8px;
+  letter-spacing: 0.7px;
+}
+.club-sport-switch button[aria-pressed="true"] {
+  color: var(--club-text);
+  background: #cbbfa41a;
+  border-color: #dbcdb42e;
+}
+.club-sport-switch button:hover {
+  color: var(--club-text);
+  background: #cbbfa41a;
+}
+.club-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--club-accent);
+  font-size: 10px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: 2.8px;
+  margin: 40px 0 10px;
+}
+.club-kicker-line {
+  display: inline-block;
+  height: 1px;
+  width: 25px;
+  background: var(--club-accent);
+}
+.club-sport-title {
+  margin: 0 0 12px -6px;
+  font-size: clamp(80px, 7.8vw, 120px);
+  font-weight: 900;
+  letter-spacing: -8px;
+  line-height: 1.1;
+  color: var(--club-text);
+  text-shadow: 0 4px 28px #0002;
+}
+.club-title-period {
+  color: var(--club-accent);
+}
+.club-rules {
+  font-size: 12px;
+  font-weight: 400;
+  color: #b1b4aa;
+  letter-spacing: 0.1px;
+  margin: 20px 0 0;
+}
+.club-home-play {
+  margin-top: auto;
+}
+.club-home .console-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: none;
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+}
+.club-home .console-tile {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 50px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--club-text);
+  background: none;
+  box-shadow: none;
+  transform: none;
+  overflow: visible;
+  isolation: auto;
+  text-align: left;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+.club-home .console-tile::before,
+.club-home .console-tile::after {
+  display: none;
+}
+.club-home .console-tile:hover {
+  z-index: auto;
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
+.club-home .console-tile strong,
+.club-home .console-tile small {
+  margin: 0;
+  line-height: 1.3;
+  transform: none;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  font-family: inherit;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.club-home .console-tile strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.club-home .console-tile small {
+  color: var(--club-muted);
+  font-size: 9px;
+  font-weight: 400;
+}
+.club-home .club-duel {
+  min-height: 82px;
+  padding: 15px 23px;
+  border: 1px solid #e6d3ae52;
+  border-radius: 2px;
+  background: var(--club-accent);
+  color: var(--club-accent-ink);
+}
+.club-home .club-duel:hover {
+  background: color-mix(in srgb, var(--club-accent), white 10%);
+}
+.club-duel-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.club-home .club-duel strong {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+.club-home .club-duel small {
+  color: var(--club-accent-ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  opacity: 0.72;
+}
+.club-arrow {
+  display: inline-block;
+  font-size: 23px;
+  line-height: 1;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+}
+.club-duel > .club-arrow {
+  font-size: 30px;
+}
+.club-secondary-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 11px;
+}
+.club-home .club-mode-link {
+  gap: 12px;
+  padding: 0 14px;
+  min-height: 44px;
+}
+.club-home .club-mode-link:first-child {
+  padding-left: 2px;
+  border-right: 1px solid var(--club-line);
+}
+.club-mode-link > span {
+  color: var(--club-muted);
+  font-size: 19px;
+}
+.club-home .club-mode-link:hover strong,
+.club-home .club-invite:hover strong {
+  color: var(--club-accent);
+}
+.club-home .club-invite {
+  justify-content: flex-start;
+  min-height: 48px;
+  gap: 11px;
+  border-bottom: 1px solid var(--club-line);
+  padding-bottom: 3px;
+}
+.club-home .club-invite strong {
+  font-size: 12px;
+  color: #bcbfb5;
+  font-weight: 400;
+}
+.club-invite-symbol {
+  font-size: 26px;
+  color: #bcbfb5;
+  line-height: 1;
+}
+.club-invite .club-arrow {
+  font-size: 17px;
+  margin-left: auto;
+  color: #a7aaa0;
+}
+.club-selected-fighter {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 76px;
+  padding: 17px 0 0;
+  gap: 12px;
+  color: var(--club-text);
+  text-align: left;
+}
+.club-fighter-image {
+  display: block;
+  width: 40px;
+  height: 46px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #c1b39822;
+  border: 1px solid #c1b3982b;
+}
+.club-fighter-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  filter: saturate(0.65);
+}
+.club-selected-fighter > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.club-selected-fighter small {
+  color: var(--club-muted);
+  font-size: 9px;
+}
+.club-selected-fighter strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.club-fighter-change {
+  margin-left: auto;
+  color: var(--club-muted);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.club-fighter-change .club-arrow {
+  font-size: 17px;
+}
+.club-selected-fighter:hover .club-fighter-change {
+  color: var(--club-accent);
+}
+.club-stage-caption {
+  position: absolute;
+  bottom: 96px;
+  right: 4.2%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  color: #e6e4d8bb;
+}
+.club-stage-caption > span {
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+.club-stage-caption > b {
+  font-size: 38px;
+  font-weight: 300;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+.club-stage-caption > i {
+  width: 24px;
+  height: 2px;
+  margin-top: 5px;
+  background: var(--club-accent);
+}
+.club-home-utilities {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  min-height: 32px;
+  width: 100%;
+}
+.club-connection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--club-dim);
+  font-size: 9px;
+}
+.club-connection .console-online {
+  color: #8c9884;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.club-connection i {
+  width: 4px;
+  height: 4px;
+  background: #bd9d68;
+  border-radius: 50%;
+}
+.club-connection.is-online i {
+  background: #9eb59a;
+}
+.club-utility-buttons {
+  display: flex;
+  gap: 8px;
+}
+.club-utility-buttons button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-height: 36px;
+  color: #b7baae;
+  border: 1px solid #d0d0b824;
+  border-radius: 2px;
+  background: #161c164d;
+}
+.club-utility-buttons button:hover {
+  color: var(--club-text);
+  border-color: #d0d0b85c;
+}
+.club-utility-buttons svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+.club-lobby.lobby {
+  padding-top: 36px;
+  padding-bottom: 24px;
+}
+.club-lobby-head {
+  width: min(550px, 46vw);
+  margin-bottom: 25px;
+  align-items: center;
+}
+.club-lobby .lobby-head .club-kicker {
+  margin: 0 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  gap: 8px;
+}
+.club-lobby .club-kicker > span {
+  color: #737d70;
+}
+.club-lobby.lobby h1 {
+  font-size: 44px;
+  font-style: normal;
+  letter-spacing: -2.5px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.club-lobby .text-button {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 0 12px 12px;
+  border: 0;
+  color: #b8bcaf;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.club-lobby .text-button .club-arrow {
+  font-size: 18px;
+}
+.club-lobby-rail {
+  width: min(550px, 46vw);
+}
+.club-lobby .lobby-code {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 15px;
+  margin: 0;
+  padding: 17px 18px;
+  min-height: 88px;
+  color: var(--club-text);
+  background: #1c2119b3;
+  border: 1px solid #ddd3b52e;
+  border-radius: 2px;
+  box-shadow: none;
+  overflow: visible;
+}
+.club-lobby .lobby-code::after {
+  display: none;
+}
+.club-lobby .lobby-code > div {
+  gap: 7px;
+  min-width: 0;
+}
+.club-lobby .lobby-code b {
+  color: #a9ad9f;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 400;
+}
+.club-lobby .lobby-code strong {
+  font-family: "Club", "Arial Black", monospace;
+  font-size: clamp(24px, 2.25vw, 32px);
+  line-height: 1;
+  color: var(--club-text);
+  letter-spacing: 5px;
+  font-weight: 600;
+  text-shadow: none;
+}
+.club-lobby .copy-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 12px;
+  margin-left: auto;
+  color: var(--club-accent);
+  background: #cfc6ac09;
+  border: 1px solid #cfc6ac33;
+  border-radius: 2px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.club-lobby .copy-button:hover {
+  background: #cfc6ac1a;
+}
+.club-lobby .copy-button svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.club-lobby .lobby-code > .club-seat-count {
+  margin-left: 0;
+  color: #a7ad9f;
+  font-size: 10px;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+.club-lobby-prompt {
+  color: #8f9788;
+  font-size: 10px;
+  margin: 12px 0 26px;
+}
+.club-lobby .teams {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.club-lobby .team-column {
+  min-width: 0;
+  background: #151b16ad;
+  border: 1px solid var(--club-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.club-lobby .team-heading,
+.club-lobby .team-1 .team-heading {
+  min-height: 44px;
+  padding: 13px 13px 11px;
+  border: 0;
+  border-bottom: 1px solid var(--club-line);
+  background: none;
+  gap: 8px;
+}
+.club-lobby .team-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #e2e4d8;
+  white-space: nowrap;
+}
+.club-lobby .team-heading h2 i {
+  display: inline-block;
+  width: 4px;
+  height: 13px;
+  background: #be8773;
+}
+.club-lobby .team-1 .team-heading h2 i {
+  background: #7c9fa7;
+}
+.club-lobby .team-heading > span {
+  color: #8f9788;
+  font-size: 9px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.club-lobby .player-row {
+  position: relative;
+  min-height: 72px;
+  padding: 12px 10px;
+  gap: 8px;
+  border-color: #e7e6d80c;
+}
+.club-lobby .player-row:last-child {
+  border-bottom: 0;
+}
+.club-lobby .player-row.is-me {
+  background: #c4d4b908;
+}
+.club-lobby .player-row.is-disconnected {
+  background: #a3795d0c;
+}
+.club-lobby .player-number {
+  color: #727d6d;
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+.club-lobby .player-row img {
+  display: block;
+  width: 33px;
+  height: 41px;
+  flex: 0 0 33px;
+  object-fit: cover;
+  object-position: center 18%;
+  border-radius: 2px;
+  background: #c1b39816;
+  filter: saturate(0.65);
+}
+.club-lobby .player-row > .club-player-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 7px;
+  flex: 1;
+}
+.club-lobby .player-row b {
+  display: block;
+  max-width: 100%;
+  color: #e8e9df;
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.club-lobby .player-row .club-player-details {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #8e9986;
+  font-size: 8px;
+  line-height: 1.2;
+}
+.club-lobby .player-row small {
+  display: inline-block;
+  margin: 0;
+  padding: 1px 3px;
+  border-radius: 1px;
+  background: #c3d3b71a;
+  color: #acb6a3;
+  font-size: 7px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.club-lobby .player-row small.club-me-tag {
+  color: #d9decf;
+}
+.club-lobby .player-row small.captain {
+  color: var(--club-accent);
+  background: #e1cda51a;
+}
+.club-lobby .ready-state {
+  color: #778370;
+  font-size: 7px;
+  letter-spacing: 0;
+  font-weight: 400;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.club-lobby .ready-state.is-ready {
+  color: #b4c5a8;
+  font-weight: 500;
+}
+.club-lobby .is-disconnected .ready-state {
+  color: #c3a18a;
+}
+.club-lobby .player-row > .club-order-button {
+  margin-left: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  min-height: 36px;
+  color: var(--club-accent);
+  border: 1px solid #b6bda738;
+  border-radius: 2px;
+}
+.club-lobby .empty-player {
+  justify-content: flex-start;
+  min-height: 72px;
+  padding: 12px 10px;
+  gap: 10px;
+  color: #727e6a;
+  font-size: 9px;
+  border-bottom: 1px solid #e7e6d80c;
+}
+.club-lobby .empty-player > span {
+  font-size: inherit;
+}
+.club-lobby .empty-player .player-number {
+  font-size: 8px;
+}
+.club-lobby .empty-player .club-empty-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 33px;
+  width: 33px;
+  height: 41px;
+  border: 1px dashed #c1cfad26;
+  border-radius: 2px;
+  color: #7d8a72;
+  font-size: 19px;
+  font-weight: 300;
+}
+.club-lobby .switch-team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 9px 13px;
+  color: #a3b296;
+  background: #c2d9ad06;
+  font-size: 9px;
+}
+.club-lobby .switch-team:hover:not(:disabled) {
+  background: #c2d9ad10;
+}
+.club-lobby .lobby-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1.15fr;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 0;
+  background: none;
+  justify-content: stretch;
+}
+.club-lobby .lobby-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 49px;
+  padding: 11px 13px;
+  border: 1px solid #cbd2ba45;
+  border-radius: 2px;
+  color: #d8dece;
+  background: #151d16ab;
+  font-size: 11px;
+  font-weight: 500;
+  transform: none;
+  box-shadow: none;
+  white-space: nowrap;
+}
+.club-lobby .lobby-actions .club-change {
+  justify-content: center;
+  color: #a7b09e;
+  border-color: #cbd2ba26;
+}
+.club-lobby .lobby-actions .primary,
+.club-lobby .lobby-actions .primary.dark {
+  min-width: 0;
+  color: var(--club-accent-ink);
+  background: var(--club-accent);
+  border-color: var(--club-accent);
+}
+.club-lobby .lobby-actions #ready:not(.primary) {
+  border-color: #98b38466;
+  color: #c4d6b5;
+}
+.club-lobby .lobby-actions button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.club-lobby .lobby-actions button:disabled {
+  opacity: 0.34;
+}
+.club-lobby .lobby-actions .club-arrow {
+  font-size: 20px;
+}
+.club-lobby .waiting-host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: auto;
+  color: #8c9982;
+  font-size: 10px;
+}
+.club-lobby .lobby-footnote {
+  margin: 15px 0 0;
+  color: #7e8a74;
+  font-size: 9px;
+  line-height: 1.6;
+  text-align: left;
+}
+.club-lobby .order-clock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 0 20px;
+  margin: 0;
+  background: none;
+  border: 0;
+  color: #a8b19f;
+}
+.club-lobby .order-clock > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 10px;
+}
+.club-lobby .order-clock small {
+  font-size: 8px;
+  color: #7d8a72;
+}
+.club-lobby .order-clock > b {
+  color: var(--club-accent);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.club-lobby .order-clock > b > small {
+  font-size: 10px;
+  margin-left: 5px;
+  font-weight: 400;
+}
+.club-lobby .club-stage-caption {
+  bottom: 40px;
+}
+.club-home :is(button, a):focus-visible,
+.club-lobby :is(button, a):focus-visible {
+  outline: 2px solid var(--club-accent);
+  outline-offset: 4px;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.club-home button:active:not(:disabled),
+.club-lobby button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+@media (min-width: 1600px) {
+  .club-home.console-shell,
+  .club-lobby.lobby {
+    padding-left: 6%;
+    padding-right: 6%;
+  }
+  .club-home-content {
+    width: 420px;
+  }
+}
+@media (max-width: 1100px) and (min-width: 701px) {
+  .club-home-content {
+    width: min(350px, 42vw);
+    min-height: 570px;
+  }
+  .club-lobby-head,
+  .club-lobby-rail {
+    width: min(520px, 55vw);
+  }
+  .club-lobby .lobby-code {
+    gap: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .club-lobby .player-row {
+    gap: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .club-lobby .player-row .player-number {
+    display: none;
+  }
+  .club-lobby .player-row img {
+    width: 30px;
+    flex-basis: 30px;
+    height: 38px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .site-header nav {
+    margin-left: 20px;
+    gap: 22px;
+  }
+}
+@media (max-width: 700px) {
+  body:has(#ui > :is(.club-home, .club-lobby)) .site-header {
+    height: 68px;
+    margin: 0 22px;
+    gap: 15px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .brand {
+    font-size: 14px;
+    gap: 8px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .brand-mark {
+    width: 29px;
+    height: 29px;
+    font-size: 24px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .brand-club {
+    font-size: 14px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .site-header nav {
+    display: none;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .header-right {
+    margin-left: auto;
+    gap: 15px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .server-status {
+    display: flex;
+    font-size: 9px;
+    gap: 6px;
+  }
+  body:has(#ui > :is(.club-home, .club-lobby)) .icon-button {
+    min-width: 32px;
+    min-height: 36px;
+    font-size: 19px;
+    padding-left: 13px;
+  }
+  .club-home.console-shell,
+  .club-lobby.lobby {
+    min-height: calc(100svh - 68px);
+    padding: 24px 24px 16px;
+  }
+  .club-home.console-shell::before,
+  .club-lobby.lobby::before {
+    background:
+      linear-gradient(90deg, #0f15119c 0%, #0f151132 65%, #0f151100 100%),
+      linear-gradient(
+        0deg,
+        #0d130ff5 0%,
+        #0d130fd9 20%,
+        #0d130f1a 58%,
+        #0d130f16 100%
+      );
+  }
+  .club-home-content {
+    width: 100%;
+    min-height: 0;
+    flex: 1;
+    gap: 0;
+  }
+  .club-sport-switch button {
+    min-width: 126px;
+    min-height: 36px;
+    font-size: 12px;
+    padding: 7px 13px;
+  }
+  .club-sport-switch button small {
+    font-size: 7px;
+  }
+  .club-kicker {
+    font-size: 9px;
+    letter-spacing: 2.2px;
+    margin-top: 26px;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+  .club-kicker-line {
+    width: 20px;
+  }
+  .club-sport-title {
+    font-size: clamp(68px, 20.5vw, 92px);
+    letter-spacing: -6px;
+    margin-left: -3px;
+    margin-bottom: 0;
+  }
+  .club-rules {
+    font-size: 10px;
+    margin-top: 14px;
+  }
+  .club-home-play {
+    padding-top: 180px;
+  }
+  .club-home .club-duel {
+    min-height: 66px;
+    padding: 12px 19px;
+  }
+  .club-duel-copy {
+    gap: 5px;
+  }
+  .club-home .club-duel strong {
+    font-size: 21px;
+    letter-spacing: -0.5px;
+  }
+  .club-home .club-duel small {
+    font-size: 9px;
+  }
+  .club-duel > .club-arrow {
+    font-size: 27px;
+  }
+  .club-secondary-modes {
+    padding-top: 7px;
+  }
+  .club-home .club-mode-link {
+    min-height: 43px;
+    padding-right: 2px;
+    padding-left: 18px;
+    gap: 10px;
+  }
+  .club-home .club-mode-link strong {
+    font-size: 13px;
+  }
+  .club-home .club-mode-link small {
+    font-size: 8px;
+  }
+  .club-home .club-mode-link:first-child {
+    padding-right: 18px;
+  }
+  .club-home .club-invite {
+    min-height: 42px;
+  }
+  .club-home .club-invite strong {
+    font-size: 11px;
+  }
+  .club-selected-fighter {
+    min-height: 62px;
+    padding-top: 11px;
+    gap: 10px;
+  }
+  .club-fighter-image {
+    width: 33px;
+    height: 39px;
+  }
+  .club-selected-fighter small {
+    font-size: 8px;
+  }
+  .club-selected-fighter strong {
+    font-size: 12px;
+  }
+  .club-fighter-change {
+    font-size: 9px;
+    gap: 13px;
+  }
+  .club-home-utilities {
+    margin-top: 16px;
+    min-height: 30px;
+  }
+  .club-connection {
+    font-size: 8px;
+  }
+  .club-utility-buttons {
+    gap: 6px;
+  }
+  .club-utility-buttons button {
+    width: 30px;
+    min-height: 30px;
+  }
+  .club-utility-buttons svg {
+    width: 14px;
+    height: 14px;
+  }
+  .club-stage-caption {
+    display: none;
+  }
+  .club-lobby.lobby {
+    padding-top: 22px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .club-lobby-head {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .club-lobby .club-kicker {
+    font-size: 9px;
+    margin-bottom: 7px;
+  }
+  .club-lobby.lobby h1 {
+    font-size: 34px;
+    letter-spacing: -1.8px;
+  }
+  .club-lobby .text-button {
+    font-size: 10px;
+    gap: 12px;
+  }
+  .club-lobby-rail {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: calc(100svh - 188px);
+  }
+  .club-lobby .lobby-code {
+    min-height: 76px;
+    padding: 14px;
+    gap: 10px;
+  }
+  .club-lobby .lobby-code strong {
+    font-size: 26px;
+    letter-spacing: 4px;
+  }
+  .club-lobby .lobby-code b {
+    font-size: 8px;
+  }
+  .club-lobby .copy-button {
+    min-height: 34px;
+    padding: 7px 9px;
+    gap: 5px;
+    font-size: 9px;
+  }
+  .club-lobby .copy-button svg {
+    width: 12px;
+    height: 12px;
+  }
+  .club-lobby .lobby-code > .club-seat-count {
+    font-size: 9px;
+  }
+  .club-lobby-prompt {
+    font-size: 9px;
+    margin: 10px 0 0;
+  }
+  .club-lobby-space {
+    flex: 1;
+    min-height: 150px;
+  }
+  .club-lobby .teams {
+    gap: 8px;
+  }
+  .club-lobby .team-heading,
+  .club-lobby .team-1 .team-heading {
+    min-height: 35px;
+    padding: 10px;
+  }
+  .club-lobby .team-heading h2 {
+    font-size: 10px;
+    gap: 6px;
+  }
+  .club-lobby .team-heading h2 i {
+    height: 11px;
+    width: 3px;
+  }
+  .club-lobby .team-heading > span {
+    font-size: 8px;
+  }
+  .club-lobby .player-row {
+    min-height: 59px;
+    padding: 9px 8px;
+    gap: 6px;
+  }
+  .club-lobby .player-row > .player-number {
+    display: none;
+  }
+  .club-lobby .player-row img {
+    flex-basis: 27px;
+    width: 27px;
+    height: 35px;
+  }
+  .club-lobby .player-row b {
+    font-size: 10px;
+  }
+  .club-lobby .player-row > .club-player-copy {
+    gap: 6px;
+  }
+  .club-lobby .player-row .club-player-details {
+    font-size: 7px;
+    gap: 3px;
+  }
+  .club-lobby .player-row small {
+    font-size: 6px;
+    padding: 1px 2px;
+  }
+  .club-lobby .ready-state {
+    font-size: 6px;
+  }
+  .club-lobby .player-row > .club-order-button {
+    min-width: 24px;
+    min-height: 32px;
+    font-size: 13px;
+  }
+  .club-lobby:has(.club-order-button) .ready-state {
+    position: absolute;
+    top: 3px;
+    right: 8px;
+    font-size: 5px;
+    opacity: 0.65;
+  }
+  .club-lobby .empty-player {
+    min-height: 59px;
+    padding: 9px 10px;
+    gap: 8px;
+    font-size: 8px;
+  }
+  .club-lobby .empty-player .player-number {
+    display: none;
+  }
+  .club-lobby .empty-player .club-empty-mark {
+    flex-basis: 27px;
+    width: 27px;
+    height: 35px;
+    font-size: 17px;
+  }
+  .club-lobby .switch-team {
+    min-height: 32px;
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .club-lobby .lobby-actions {
+    margin-top: 12px;
+    grid-template-columns: 0.9fr 1fr 1fr;
+    gap: 6px;
+  }
+  .club-lobby .lobby-actions button {
+    min-height: 45px;
+    padding: 10px;
+    font-size: 10px;
+    gap: 5px;
+  }
+  .club-lobby .lobby-actions .club-arrow {
+    font-size: 17px;
+  }
+  .club-lobby .waiting-host {
+    font-size: 8px;
+  }
+  .club-lobby .lobby-footnote {
+    font-size: 8px;
+    margin-top: 12px;
+  }
+  .club-lobby .order-clock {
+    padding-bottom: 0;
+  }
+  .club-lobby .order-clock > div {
+    font-size: 9px;
+  }
+  .club-lobby .order-clock small {
+    font-size: 7px;
+  }
+}
+@media (max-width: 700px) and (max-height: 760px) {
+  .club-home-play {
+    padding-top: 110px;
+  }
+  .club-home .club-kicker {
+    margin-top: 20px;
+  }
+  .club-home .club-sport-title {
+    font-size: 68px;
+  }
+  .club-lobby-space {
+    min-height: 100px;
+  }
+}
+@media (min-width: 701px) and (max-height: 800px) {
+  .club-home.console-shell {
+    padding-top: 26px;
+    padding-bottom: 16px;
+  }
+  .club-home-content {
+    min-height: 530px;
+    gap: 20px;
+  }
+  .club-home .club-kicker {
+    margin-top: 26px;
+  }
+  .club-home .club-sport-title {
+    font-size: 92px;
+  }
+  .club-home .club-duel {
+    min-height: 72px;
+  }
+  .club-home-utilities {
+    margin-top: 16px;
+  }
+  .club-lobby.lobby {
+    padding-top: 26px;
+  }
+  .club-lobby .player-row,
+  .club-lobby .empty-player {
+    min-height: 60px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .club-home *,
+  .club-lobby * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

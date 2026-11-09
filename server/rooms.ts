@@ -7,6 +7,7 @@ import {
   type CharacterId,
   type Bout,
   type Input,
+  type Sport,
 } from "../shared/game.ts";
 export type Player = {
   id: string;
@@ -19,6 +20,7 @@ export type Player = {
   disconnectedAt: number | null;
 };
 export type Room = {
+  sport: Sport;
   code: string;
   mode: "duel" | "team";
   size: number;
@@ -50,7 +52,15 @@ export class Rooms {
     if (!p) throw Error("로비 참여가 필요합니다.");
     return p;
   }
-  create(token: string, name: string, mode: "duel" | "team", size: number) {
+  create(
+    token: string,
+    name: string,
+    mode: "duel" | "team",
+    size: number,
+    sport: Sport = "boxing",
+  ) {
+    if (!["boxing", "bjj"].includes(sport))
+      throw Error("종목을 확인해 주세요.");
     if (
       !["duel", "team"].includes(mode) ||
       !Number.isInteger(size) ||
@@ -68,6 +78,7 @@ export class Rooms {
       ).join("");
     } while (this.rooms.has(code));
     const r: Room = {
+      sport,
       code,
       mode,
       size: mode === "duel" ? 1 : size,
@@ -201,7 +212,7 @@ export class Rooms {
     const index = r.round < r.size ? r.round : 0;
     const a = r.players.find((p) => p.id === r.orders[0][index])!,
       b = r.players.find((p) => p.id === r.orders[1][index])!;
-    r.bout = createBout([a.id, b.id], [a.character, b.character]);
+    r.bout = createBout([a.id, b.id], [a.character, b.character], r.sport);
     r.phase = "playing";
     r.nextAt = 0;
     this.synchronize(r, now);

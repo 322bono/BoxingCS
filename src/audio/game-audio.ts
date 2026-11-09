@@ -1,5 +1,6 @@
 import type { Bout } from "../../shared/game";
 import { CombatSoundTracker, type CombatSoundCue } from "./combat-sounds";
+import { GrapplingSoundTracker } from "./grappling-sounds";
 import { MatchAtmosphereTracker, type ArenaFrame } from "./match-atmosphere";
 export type AudioScene = "menu" | "lobby" | "fight" | "result";
 const files = {
@@ -65,6 +66,7 @@ export class GameAudio {
   private musicEnabled: boolean;
   private pauseTimer: ReturnType<typeof setTimeout> | undefined;
   private tracker = new CombatSoundTracker();
+  private grapplingTracker = new GrapplingSoundTracker();
   private atmosphere = new MatchAtmosphereTracker();
   private arena: ArenaFrame | null = null;
   private combatKey = "";
@@ -87,7 +89,7 @@ export class GameAudio {
     this.music.hidden = true;
     this.music.loop = true;
     this.music.preload = "metadata";
-    this.music.setAttribute("aria-label", "Before the Bell 메인 배경음악");
+    this.music.setAttribute("aria-label", "Before the Bell 메인·대기실 배경음악");
     document.body.append(this.music);
     const unlock = () => this.unlock();
     addEventListener("pointerdown", unlock, { capture: true });
@@ -162,6 +164,7 @@ export class GameAudio {
         this.crowdCueGeneration++;
       }
       this.tracker.reset();
+      this.grapplingTracker.reset();
       this.atmosphere.reset();
       this.arena = null;
       this.combatKey = "";
@@ -338,7 +341,11 @@ export class GameAudio {
     this.syncCrowd();
   }
   private wantsMusic() {
-    return this.musicEnabled && this.scene === "menu" && this.visible;
+    return (
+      this.musicEnabled &&
+      (this.scene === "menu" || this.scene === "lobby") &&
+      this.visible
+    );
   }
   private syncMusic(immediate = false) {
     clearTimeout(this.pauseTimer);
@@ -480,12 +487,26 @@ export class GameAudio {
       this.combatKey = key;
       this.sceneEpoch++;
       this.tracker.reset();
+      this.grapplingTracker.reset();
       this.atmosphere.reset();
       this.stopCrowdLoop();
       this.stopCrowdReactions();
     }
-    for (const cue of this.tracker.update(bout, view)) {
-      if (this.scene === "fight" && !paused) this.playCue(cue);
+    const cues =
+      bout.sport === "bjj"
+        ? this.grapplingTracker.update(bout, view)
+        : this.tracker.update(bout, view);
+    for (const cue of cues) {
+      if (this.scene === "fight" && !paused) {
+        if (bout.sport === "bjj") {
+          if (cue.sound === "fall") this.duckCrowd();
+          this.play(cue.sound, {
+            pan: cue.pan,
+            gain: cue.sound === "fall" ? 0.55 : 1,
+            rate: cue.sound === "fall" ? 1.1 : 1,
+          });
+        } else this.playCue(cue);
+      }
     }
     this.arena = this.atmosphere.update(
       bout,

@@ -76,7 +76,7 @@ test("AI practice runs in first-person and exits cleanly", async ({ page }) => {
 test("two real browsers join by invite and start the same match", async ({
   browser,
 }) => {
-  test.setTimeout(150000);
+  test.setTimeout(210000);
   const a = await browser.newContext({
       viewport: { width: 800, height: 600 },
       deviceScaleFactor: 0.8,
@@ -112,6 +112,10 @@ test("two real browsers join by invite and start the same match", async ({
     await expect(q.locator("#hud")).toBeVisible();
     await expect(q.locator("#name-0")).toContainText("BLUE");
     await expect(q.locator("#name-1")).toContainText("RED");
+    for (const page of [p, q])
+      await expect(page.locator("#fight-announcement")).toHaveText("", {
+        timeout: 65000,
+      });
     await p.getByRole("button", { name: "경기 나가기" }).click();
     await expect(q.getByText("상대 기권")).toBeVisible({ timeout: 15000 });
   } finally {
@@ -186,7 +190,7 @@ test("missing model slots stay explicit and cannot be selected", async ({
   await page.screenshot({ path: "test-results/pending-model-roster.png" });
 });
 
-test("the hidden ring stops drawing behind the console menu", async ({
+test("the live club renders behind the menu and pauses when the page is hidden", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -203,12 +207,19 @@ test("the hidden ring stops drawing behind the console menu", async ({
   });
   await page.goto("/");
   await expect(page.locator(".console-board")).toBeVisible();
-  const draws = await page.evaluate(async () => {
-    const before = (window as any).ringDraws;
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-    );
-    return (window as any).ringDraws - before;
+  await expect(page.locator("#world")).toBeVisible();
+  const before = await page.evaluate(() => (window as any).ringDraws);
+  await expect
+    .poll(() => page.evaluate(() => (window as any).ringDraws))
+    .toBeGreaterThan(before);
+  const paused = await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+    return (window as any).ringDraws;
   });
-  expect(draws).toBe(0);
+  await page.waitForTimeout(120);
+  expect(await page.evaluate(() => (window as any).ringDraws)).toBe(paused);
 });

@@ -2,7 +2,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { prepareFighter, RigController } from "./rig";
 import { prepareNativeClips } from "./native-clips";
 import { addBoxingGloves } from "./gloves";
-import type { CharacterId } from "../../shared/game";
+import type { CharacterId, Sport } from "../../shared/game";
 export type ModelEntry = {
   status: "pending" | "ready";
   model: string | null;
@@ -48,7 +48,7 @@ export class FighterLibrary {
       );
     }
   }
-  async instantiate(id: CharacterId, corner = 0) {
+  async instantiate(id: CharacterId, corner = 0, sport: Sport = "boxing") {
     await this.initialized;
     const entry = modelEntries.get(id);
     if (entry?.status !== "ready" || !entry.model) return null;
@@ -67,7 +67,8 @@ export class FighterLibrary {
           ? prepareNativeClips(root, asset.animations, entry.clips)
           : asset.animations,
       );
-      addBoxingGloves(root, corner);
+      if (sport === "boxing") addBoxingGloves(root, corner);
+      root.userData.sport = sport;
       root.userData.generatedAsset = true;
       root.userData.rigController = controller;
       return root;

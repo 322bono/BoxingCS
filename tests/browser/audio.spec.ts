@@ -1,4 +1,68 @@
 import { test, expect } from "@playwright/test";
+
+test("Before the Bell continues through lobby updates and obeys mute, visibility and match start", async ({
+  page,
+}) => {
+  await page.goto("/tests/fixtures/audio-harness.html");
+  await page.evaluate(() =>
+    (window as any).audioHarness.audio.setScene("menu"),
+  );
+  await page.getByRole("button", { name: "오디오 시작", exact: true }).click();
+  const music = page.locator("#menu-music");
+  const playing = () =>
+    music.evaluate(
+      (element: HTMLAudioElement) => !element.paused && element.currentTime > 0,
+    );
+  await expect.poll(playing).toBe(true);
+  const before = await music.evaluate(
+    (element: HTMLAudioElement) => element.currentTime,
+  );
+  await page.evaluate(() => {
+    const audio = (window as any).audioHarness.audio;
+    for (let i = 0; i < 60; i++) audio.setScene("lobby");
+  });
+  await expect
+    .poll(() =>
+      music.evaluate(
+        (element: HTMLAudioElement, start) =>
+          !element.paused && element.currentTime > start + 0.3,
+        before,
+      ),
+    )
+    .toBe(true);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect.poll(playing).toBe(false);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => false,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect.poll(playing).toBe(true);
+  await page.evaluate(() => {
+    const audio = (window as any).audioHarness.audio;
+    audio.setMusicEnabled(false);
+    audio.setScene("menu");
+    audio.setScene("lobby");
+  });
+  await expect.poll(playing).toBe(false);
+  await page.evaluate(() =>
+    (window as any).audioHarness.audio.setMusicEnabled(true),
+  );
+  await expect.poll(playing).toBe(true);
+  await page.evaluate(() =>
+    (window as any).audioHarness.audio.setScene("fight"),
+  );
+  await expect.poll(playing).toBe(false);
+});
+
 test("menu music unlocks, persists its mute preference, and pauses for recorded boxing audio", async ({
   page,
 }) => {

@@ -1,3 +1,14 @@
+import {
+  createGrapplingState,
+  stepGrappling,
+  aiGrapplingInput,
+  type GrapplingState,
+} from "./grappling";
+
+export type Sport = "boxing" | "bjj";
+export const sportName = (sport: Sport) =>
+  sport === "bjj" ? "주짓수" : "복싱";
+
 export const CHARACTERS = [
   {
     id: "nova",
@@ -96,6 +107,8 @@ export type Fighter = {
   hits: number;
 };
 export type Bout = {
+  sport: Sport;
+  grappling?: GrapplingState;
   id: string;
   fighters: [Fighter, Fighter];
   time: number;
@@ -107,8 +120,11 @@ export type Bout = {
 export function createBout(
   ids: [string, string],
   chars: [CharacterId, CharacterId],
+  sport: Sport = "boxing",
 ): Bout {
   return {
+    sport,
+    ...(sport === "bjj" ? { grappling: createGrapplingState() } : {}),
     id: crypto.randomUUID(),
     fighters: ids.map((id, i) => ({
       id,
@@ -146,6 +162,10 @@ export function stepBout(b: Bout, inputs: [Input, Input], dt: number): void {
     return;
   }
   b.time = Math.max(0, b.time - dt);
+  if (b.sport === "bjj") {
+    stepGrappling(b, inputs, dt);
+    return;
+  }
   // Both fighters move from the same tick's positions, regardless of seat order.
   const positions = b.fighters.map(({ x, z }) => ({ x, z }));
   for (let i = 0; i < 2; i++) {
@@ -272,6 +292,7 @@ export function aiInput(
   difficulty: number,
   roll: number,
 ): Input {
+  if (b.sport === "bjj") return aiGrapplingInput(b, index, difficulty, roll);
   const f = b.fighters[index],
     o = b.fighters[1 - index],
     distance = Math.hypot(f.x - o.x, f.z - o.z);

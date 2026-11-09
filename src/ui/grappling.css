@@ -1,0 +1,203 @@
+.bjj-hud {
+  --mat-accent: #b6d4b7;
+}
+.bjj-hud .health-player strong {
+  display: block;
+  color: #eee9dd;
+  font-size: clamp(16px, 2.1vw, 29px);
+  font-weight: 850;
+  letter-spacing: -1px;
+  margin: 8px 0;
+}
+.bjj-hud .health-track {
+  height: 4px;
+  opacity: 0.8;
+}
+.bjj-hud .health-track i {
+  background: var(--mat-accent);
+}
+.bjj-hud .opponent .health-track i {
+  background: #c79e81;
+}
+.bjj-hud .fight-clock b {
+  font-size: clamp(28px, 4vw, 49px);
+}
+.bjj-hud .fight-clock > span {
+  color: var(--mat-accent);
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+.bjj-hud .fight-controls b {
+  font-weight: 500;
+}
+.bjj-camera {
+  position: absolute;
+  right: 32px;
+  top: 122px;
+  pointer-events: auto;
+  padding: 8px 12px;
+  color: #eee9dd;
+  border: 1px solid #d9e3d633;
+  background: #0b111cb3;
+  font: 600 10px inherit;
+}
+.bjj-position {
+  position: absolute;
+  right: 32px;
+  bottom: 116px;
+  width: 220px;
+  padding: 12px 0 10px 15px;
+  border-left: 2px solid var(--mat-accent);
+  background: linear-gradient(90deg, #0b111cc9, transparent);
+  text-align: left;
+  color: #efe9df;
+  pointer-events: none;
+}
+.bjj-position > span:first-child {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--mat-accent);
+}
+.bjj-position strong {
+  display: block;
+  margin: 5px 0 9px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.bjj-position small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #c0c8c5;
+  margin-top: 8px;
+}
+.bjj-position > #bjj-control-label {
+  font-size: 9px;
+  color: #c6d8c9;
+}
+.bjj-control-track {
+  height: 3px;
+  margin: 6px 0;
+  background: #ffffff14;
+  width: 90%;
+}
+.bjj-control-track i {
+  display: block;
+  height: 100%;
+  background: var(--mat-accent);
+  transition: width 0.12s linear;
+}
+.bjj-submission {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, 75vw);
+  text-align: center;
+  padding: 12px 16px;
+  background: #10191ae6;
+  border-top: 2px solid #b6d4b7;
+  box-shadow: 0 10px 25px #0004;
+}
+.bjj-submission[hidden] {
+  display: none;
+}
+.bjj-submission[data-role="defend"] {
+  border-color: #e18b6f;
+}
+.bjj-submission span {
+  font-weight: 700;
+  font-size: 13px;
+}
+.bjj-submission > div {
+  height: 5px;
+  background: #ffffff1c;
+  margin: 9px 0;
+}
+.bjj-submission i {
+  display: block;
+  height: 100%;
+  background: #badbb8;
+  transition: width 0.12s linear;
+}
+.bjj-submission[data-role="defend"] i {
+  background: #e18b6f;
+}
+.bjj-submission small {
+  font-size: 10px;
+  color: #ccd4cf;
+}
+.bjj-hud .signature-button {
+  background: #14221dd6;
+  border-color: #afcba580;
+}
+.bjj-hud .signature-button > kbd {
+  color: var(--mat-accent);
+}
+.bjj-hud .fight-bottom {
+  background: linear-gradient(0deg, #080f10bb, transparent);
+}
+@media (max-width: 760px) {
+  .bjj-hud .fight-top {
+    padding-top: 16px;
+  }
+  .bjj-hud .health-player strong {
+    font-size: 19px;
+    margin: 5px 0;
+  }
+  .bjj-hud .health-player > span {
+    font-size: 9px;
+  }
+  .bjj-camera {
+    right: 12px;
+    top: 95px;
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+  .bjj-position {
+    right: 12px;
+    bottom: 148px;
+    width: 150px;
+    padding: 7px 0 7px 9px;
+  }
+  .bjj-position strong {
+    font-size: 15px;
+    margin: 4px 0;
+  }
+  .bjj-position small {
+    font-size: 8px;
+    max-width: 144px;
+  }
+  .bjj-position > #bjj-control-label {
+    font-size: 8px;
+  }
+  .bjj-position > span:first-child {
+    font-size: 8px;
+  }
+  .bjj-hud .signature-button {
+    bottom: 146px;
+    left: 12px;
+    width: 145px;
+  }
+  .bjj-hud .touch-actions button {
+    font-size: 10px;
+    line-height: 1.15;
+    padding: 7px;
+  }
+  .bjj-submission {
+    top: 25%;
+    padding: 9px 12px;
+  }
+  .bjj-hud .fight-bottom {
+    bottom: 0;
+  }
+  .bjj-hud .fight-leave {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bjj-submission i,
+  .bjj-control-track i {
+    transition: none;
+  }
+}

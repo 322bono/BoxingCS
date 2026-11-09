@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><style>html,body,#ring{margin:0;width:100%;height:100%;overflow:hidden;background:#131c18}canvas{display:block}</style></head>
+<body><div id="ring"></div><script type="module">
+import {World} from '/src/world.ts';
+import {createBout} from '/shared/game.ts';
+const world=new World(document.querySelector('#ring'),()=>{throw Error('WebGL lost')});
+world.renderer.setAnimationLoop(null);world.reduced=true;world.shake=false;
+await world.setCharacters('nova','blaze','bjj');
+const bout=createBout(['a','b'],['nova','blaze'],'bjj');bout.countdown=0;
+const pose=(position='standing',top=null,mode='first',view=0,submission=null,transition=null)=>{
+  bout.grappling.position=position;bout.grappling.top=top;bout.grappling.submission=submission;bout.grappling.transition=transition;
+  bout.id=crypto.randomUUID();world.bjjCamera=mode;world.fight(bout,view);world.lastFrame=performance.now()-1000/30;world.render();
+  return {camera:world.camera.position.toArray(),rotation:world.camera.rotation.toArray(),calls:world.renderer.info.render.calls,triangles:world.renderer.info.render.triangles};
+};
+pose();window.worldBjjHarness={world,bout,pose};
+</script></body></html>

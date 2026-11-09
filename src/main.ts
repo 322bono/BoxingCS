@@ -1,7 +1,17 @@
 import "./style.css";
+import "./ui/club.css";
+import "./ui/grappling.css";
+import "./ui/mobile.css";
+import { installMobileViewport } from "./ui/mobile-viewport";
+import { HeldControls } from "./held-controls";
+import { homeMarkup, lobbyMarkup } from "./ui/club-shell";
+import { grapplingContext, bjjSignatures } from "../shared/grappling";
+import { grapplingHudMarkup, updateGrapplingHud } from "./ui/grappling-hud";
 import { io } from "socket.io-client";
 import {
   CHARACTERS,
+  sportName,
+  type Sport,
   PENDING_MODEL_IDS,
   createBout,
   stepBout,
@@ -35,6 +45,13 @@ let selected: CharacterId = (savedCharacter as CharacterId) || "nova";
 if (!CHARACTERS.some((c) => c.id === selected)) selected = "nova";
 if (savedCharacter && savedCharacter !== selected)
   localStorage.setItem("ring-character", selected);
+let selectedSport: Sport =
+  localStorage.getItem("ring-sport") === "bjj" ? "bjj" : "boxing";
+let bjjCamera: "first" | "broadcast" =
+  localStorage.getItem("ring-bjj-camera") === "broadcast"
+    ? "broadcast"
+    : "first";
+const activeSport = (): Sport => local?.sport || room?.sport || selectedSport;
 let characterPreview: CharacterPreview | null = null;
 let pickerContext: {
   candidate: CharacterId;
@@ -91,6 +108,7 @@ const settings = {
       : 0.7;
   })(),
 };
+installMobileViewport();
 document.body.classList.add("booting");
 $("#app").innerHTML =
   `<div id="world"></div><div id="flash"></div><header class="site-header"><a class="brand" href="/" aria-label="RING CLUB 홈"><span class="brand-mark">R<span>↗</span></span><span>RING<span class="brand-club">CLUB</span><small>THE FRIENDS FIGHT CLUB</small></span></a><nav aria-label="메인 메뉴"><button class="nav-active" data-home>플레이 <span>01</span></button><button data-roster>파이터 <span>02</span></button><button data-help>플레이 가이드 <span>03</span></button></nav><div class="header-right"><span class="server-status"><i></i><span id="server-text">연결 중</span></span><button class="icon-button" data-settings aria-label="설정">⚙</button></div></header><main id="ui"><p class="boot-message" role="status">링을 준비하고 있습니다…</p></main><div id="modal-root"></div><div id="toast" role="status" aria-live="polite"></div>`;
@@ -137,7 +155,6 @@ socket.on("connect", () => {
 socket.on("disconnect", () => {
   online = false;
   keys.clear();
-  skillPointer = false;
   input = idleInput();
   preparingSync = "";
   updateConnection();
@@ -234,38 +251,59 @@ function selectionPortrait(o: CharacterId, e: string) {
 }
 const modelReady = (o: string) => modelEntries.get(o)?.status === "ready";
 function renderHome() {
-  if (!worldBootComplete) return;
-  if (!room) gameAudio.setScene("menu");
-  room ||
-    ((local = null),
-    (fingerprint = ""),
-    (document.body.className = online
-      ? "console-home"
-      : "console-home offline"),
-    world?.menu(),
-    ($("#ui").innerHTML =
-      `<section class="console-shell"><div class="console-top"><span class="console-logo">RING<b>CLUB</b></span><span class="console-online">● PRIVATE ONLINE / 1ST PERSON</span></div><h1 class="sr-only">친구끼리, 제대로 한 판.</h1><div class="console-board" aria-label="게임 모드"><button class="console-tile battle-tile" data-mode="duel" aria-label="1 vs 1 친구 대전"><span class="tile-symbol">✕</span><strong>대전</strong><em>1 vs 1</em></button><button class="console-tile practice-tile" data-mode="ai" aria-label="AI 연습"><span class="tile-symbol">✦</span><strong>연습</strong><em>AI 난이도 선택</em></button><button class="console-tile fighters-tile" id="console-fighters"><span class="tile-symbol">▧</span><strong>캐릭터</strong><em>능력 · 스킬</em></button><button class="console-tile crew-tile" data-mode="team" aria-label="팀 vs 팀 대전"><span class="tile-symbol">⚑</span><strong>팀 배틀</strong><em>2 vs 2 — 4 vs 4</em></button><button class="console-tile invite-tile" data-join aria-label="초대코드로 참가"><span class="tile-symbol">◎</span><strong>친구 초대</strong><em>초대코드로 참가 ↗</em></button><div class="console-medal" aria-hidden="true"><div class="medal-faces">${[
-        ...CHARACTERS.filter((o) => modelReady(o.id)),
-        ...CHARACTERS.filter((o) => !modelReady(o.id)),
-      ]
-        .slice(0, 4)
-        .map((o) => `<img src="${portrait(o.id)}" alt=""/>`)
-        .join(
-          "",
-        )}</div><b>VS</b></div></div><aside class="console-rail"><button data-help aria-label="플레이 가이드">?</button><button id="console-music" aria-label="${settings.music ? "배경음악 끄기" : "배경음악 켜기"}" aria-pressed="${settings.music}" title="Before the Bell">${musicIcon(settings.music)}</button><button id="console-settings" aria-label="설정">⚙</button><button id="console-fullscreen" aria-label="전체 화면">⛶</button></aside><div class="console-bottom"><b>모드를 선택하세요</b><small>방향키 이동 · Enter 선택</small></div></section>`),
-    ($("#console-fighters").onclick = () => openCharacterPicker()),
-    ($("#console-settings").onclick = openSettings),
-    ($("#console-fullscreen").onclick = () => {
-      document.fullscreenElement
-        ? document.exitFullscreen()
-        : document.documentElement
-            .requestFullscreen()
-            .catch(() => toast("전체 화면을 지원하지 않는 브라우저입니다."));
-    }),
-    bindHomeButtons(),
-    updateConnection());
+  if (!worldBootComplete || room) return;
+  gameAudio.setScene("menu");
+  local = null;
+  fingerprint = "";
+  document.body.className = online ? "console-home" : "console-home offline";
+  document.body.dataset.sport = selectedSport;
+  world?.menu(selectedSport);
+  void world?.setCharacters(
+    selected,
+    selected === "blaze" ? "nova" : "blaze",
+    selectedSport,
+  );
+  const character = CHARACTERS.find((c) => c.id === selected)!;
+  $("#ui").innerHTML = homeMarkup(selectedSport, {
+    selectedName: character.name,
+    selectedPortrait: portrait(selected),
+    online,
+  });
+  $("#console-fighters").onclick = () => openCharacterPicker();
+  const music = $("#console-music");
+  if (music) {
+    music.innerHTML = musicIcon(settings.music);
+    music.setAttribute(
+      "aria-label",
+      settings.music ? "배경음악 끄기" : "배경음악 켜기",
+    );
+    music.setAttribute("aria-pressed", String(settings.music));
+  }
+  const fullscreen = $("#console-fullscreen");
+  if (fullscreen)
+    fullscreen.onclick = () => {
+      void (
+        document.fullscreenElement
+          ? document.exitFullscreen()
+          : document.documentElement.requestFullscreen()
+      ).catch(() => toast("전체 화면을 지원하지 않는 브라우저입니다."));
+    };
+  bindHomeButtons();
+  updateConnection();
 }
 function bindHomeButtons() {
+  document
+    .querySelectorAll<HTMLButtonElement>("button[data-sport]")
+    .forEach((button) => {
+      button.onclick = () => {
+        const sport = button.dataset.sport;
+        if ((sport !== "boxing" && sport !== "bjj") || room || local) return;
+        selectedSport = sport;
+        localStorage.setItem("ring-sport", sport);
+        gameAudio.play("select", { gain: 0.7 });
+        renderHome();
+      };
+    });
   const musicButton = $("#console-music");
   if (musicButton) musicButton.onclick = () => setMenuMusic(!settings.music);
   (document
@@ -326,7 +364,7 @@ function openSetup(o: "duel" | "team" | "ai" | "join") {
     },
     t = CHARACTERS.find((i) => i.id === selected)!;
   (modal(
-    `<h2 id="dialog-title">${e[o]}</h2><p class="dialog-description">${o === "ai" ? "난이도를 선택하세요." : o === "join" ? "초대코드 6자리를 입력하세요." : "모두 준비하면 방장이 시작합니다."}</p><form id="setup-form"><label>닉네임<input name="nickname" aria-label="닉네임" maxlength="16" autocomplete="nickname" value="${esc(localStorage.getItem("ring-name") || "")}" placeholder="링 위에서 불릴 이름" required/></label>${o === "join" ? '<label>초대코드<input name="code" aria-label="초대코드" maxlength="6" minlength="6" pattern="[A-Za-z2-9]{6}" placeholder="ABC234" class="code-input" required autocomplete="off"/></label>' : ""}${o === "team" ? '<fieldset><legend>팀 인원 <small>같은 인원끼리 대결합니다</small></legend><div class="choice-row">' + [2, 3, 4].map((i) => `<label class="choice"><input type="radio" name="size" value="${i}" ${i === 2 ? "checked" : ""}/><span>${i} vs ${i}</span></label>`).join("") + "</div></fieldset>" : ""}${
+    `<h2 id="dialog-title">${o === "join" ? e[o] : `${sportName(selectedSport)} · ${e[o]}`}</h2><p class="dialog-description">${o === "ai" ? "난이도를 선택하세요." : o === "join" ? "초대코드 6자리를 입력하세요." : "모두 준비하면 방장이 시작합니다."}</p><form id="setup-form"><label>닉네임<input name="nickname" aria-label="닉네임" maxlength="16" autocomplete="nickname" value="${esc(localStorage.getItem("ring-name") || "")}" placeholder="링 위에서 불릴 이름" required/></label>${o === "join" ? '<label>초대코드<input name="code" aria-label="초대코드" maxlength="6" minlength="6" pattern="[A-Za-z2-9]{6}" placeholder="ABC234" class="code-input" required autocomplete="off"/></label>' : ""}${o === "team" ? '<fieldset><legend>팀 인원 <small>같은 인원끼리 대결합니다</small></legend><div class="choice-row">' + [2, 3, 4].map((i) => `<label class="choice"><input type="radio" name="size" value="${i}" ${i === 2 ? "checked" : ""}/><span>${i} vs ${i}</span></label>`).join("") + "</div></fieldset>" : ""}${
       o === "ai"
         ? '<fieldset><legend>스파링 난이도</legend><div class="choice-row">' +
           [
@@ -341,7 +379,7 @@ function openSetup(o: "duel" | "team" | "ai" | "join") {
             .join("") +
           "</div></fieldset>"
         : ""
-    }${o !== "join" ? `<div class="selected-summary"><img src="${portrait(selected)}" alt=""/><div><b>${t.name} <span>${t.trait}</span></b></div></div>` : ""}<button class="primary submit" ${o !== "ai" ? "data-online" : ""} type="submit">${o === "join" ? "참가하기" : o === "ai" ? "연습 시작" : "로비 만들기"} <span aria-hidden="true">↗</span></button><p class="form-note">${o === "ai" ? "J 잽 · K 훅 · Space 가드 · Q 스킬" : ""}</p></form>`,
+    }${o !== "join" ? `<div class="selected-summary"><img src="${portrait(selected)}" alt=""/><div><b>${t.name} <span>${t.trait}</span></b></div></div>` : ""}<button class="primary submit" ${o !== "ai" ? "data-online" : ""} type="submit">${o === "join" ? "참가하기" : o === "ai" ? "연습 시작" : "로비 만들기"} <span aria-hidden="true">↗</span></button><p class="form-note">${o === "ai" ? (selectedSport === "bjj" ? "J 그립 · K 테이크다운 · Space 방어" : "J 잽 · K 훅 · Space 가드 · Q 스킬") : ""}</p></form>`,
     o,
   ),
     updateConnection(),
@@ -363,6 +401,7 @@ function openSetup(o: "duel" | "team" | "ai" | "join") {
             ? { type: "join", name: n, code: s.get("code") }
             : {
                 type: "create",
+                sport: selectedSport,
                 name: n,
                 mode: o,
                 size: o === "team" ? Number(s.get("size")) : 1,
@@ -407,7 +446,7 @@ function fighterSelection(candidate: CharacterId, continuation?: () => void) {
   const unavailable =
     PENDING_MODEL_IDS.has(candidate) && !modelReady(candidate);
   const c = CHARACTERS.find((c) => c.id === candidate)!,
-    sig = signatures[c.id];
+    sig = activeSport() === "bjj" ? bjjSignatures[c.id] : signatures[c.id];
   modal(
     `<div class="select-arena" style="--fighter:${c.color}"><div class="select-top"><h2 id="dialog-title">캐릭터 선택</h2></div><div class="select-body"><div class="select-portrait"><span class="portrait-word">${c.title.replace("THE ", "")}</span>${selectionPortrait(c.id, c.name)}${modelReady(candidate) ? '<div id="character-stage"></div>' : ""}<b>01 <small>PLAYER</small></b></div><div class="select-info"><h3>${c.name}</h3><span class="select-style">${c.trait}</span><div class="select-stats">${["파워", "스피드", "지구력"].map((label, i) => `<div><span>${label}</span><div>${Array.from({ length: 5 }, (_, j) => `<i class="${j < c.stats[i] ? "filled" : ""}"></i>`).join("")}</div></div>`).join("")}</div><div class="signature-card"><kbd>Q</kbd><div><b>${sig.name}</b><span>${sig.description}</span></div>${modelReady(candidate) ? '<button type="button" id="preview-skill" aria-label="스킬 시연">▶ 시연</button>' : ""}</div><p class="model-status">${modelReady(candidate) ? "3D 모델" : unavailable ? "3D 모델 생성 대기" : "임시 모델"}</p></div></div><div class="select-roster">${CHARACTERS.map((f, i) => `<button data-preview="${f.id}" class="${f.id === candidate ? "active" : ""}" aria-label="${f.name} 미리보기">${selectionPortrait(f.id, "")}<span>0${i + 1} <b>${f.name}</b></span>${f.id === candidate ? "<em>1P</em>" : ""}</button>`).join("")}</div><div class="select-bottom"><span>Q · 게이지 100에서 발동</span><button class="primary" id="select-fighter" ${unavailable ? "disabled" : ""}>${unavailable ? "3D 모델 생성 대기" : continuation ? "이 파이터로 계속" : "이 파이터 선택"} <span>↗</span></button></div></div>`,
     "fighter-select",
@@ -418,6 +457,7 @@ function fighterSelection(candidate: CharacterId, continuation?: () => void) {
         $("#character-stage"),
         world.library,
         candidate,
+        activeSport(),
       );
       $("#preview-skill").onclick = () => {
         characterPreview?.skill();
@@ -447,7 +487,11 @@ function fighterSelection(candidate: CharacterId, continuation?: () => void) {
       return;
     selected = candidate;
     localStorage.setItem("ring-character", selected);
-    world?.setCharacters(selected, selected === "blaze" ? "nova" : "blaze");
+    world?.setCharacters(
+      selected,
+      selected === "blaze" ? "nova" : "blaze",
+      activeSport(),
+    );
     closeModal();
     gameAudio.play("select", { rate: 0.95 });
     if (continuation) continuation();
@@ -462,7 +506,9 @@ function startPractice() {
   const opponent =
     CHARACTERS.find((c) => c.id !== selected && modelReady(c.id))?.id ||
     selected;
-  local = createBout(["local", "AI"], [selected, opponent]);
+  local = createBout(["local", "AI"], [selected, opponent], selectedSport);
+  document.body.dataset.sport = selectedSport;
+  if (world) world.bjjCamera = bjjCamera;
   input = idleInput();
   lastHp = [100, 100];
   lastSkills = [0, 0];
@@ -474,6 +520,8 @@ function startPractice() {
 function renderRoom() {
   if (!room) return;
   const r = room;
+  document.body.dataset.sport = r.sport || "boxing";
+  if (world) world.bjjCamera = bjjCamera;
   if (r.phase !== "playing" && r.bout?.ended)
     gameAudio.observeCombat(r.bout, view);
   gameAudio.setScene(
@@ -507,7 +555,16 @@ function renderRoom() {
   document.body.classList.remove("fighting");
   document.body.classList.remove("console-home");
   document.body.classList.add("in-room");
-  world?.menu();
+  world?.menu(r.sport);
+  const ownPreview = r.players.find((p) => p.id === myId) || r.players[0];
+  const otherPreview =
+    r.players.find((p) => p.team !== ownPreview?.team) || ownPreview;
+  if (ownPreview && otherPreview)
+    void world?.setCharacters(
+      ownPreview.character,
+      otherPreview.character,
+      r.sport,
+    );
   const key = JSON.stringify({
     phase: r.phase,
     players: r.players,
@@ -525,28 +582,7 @@ function renderRoom() {
   const me = r.players.find((p) => p.id === myId);
   if (!me) return;
   const host = r.host === myId;
-  $("#ui").innerHTML =
-    `<section class="lobby"><div class="lobby-head"><div><h1>${r.phase === "ordering" ? "출전 순서" : "대기실"}</h1><p>${r.phase === "ordering" ? "팀장이 순서를 정합니다." : "모두 준비하면 시작합니다."}</p></div><button class="text-button" data-leave>로비 나가기 ↗</button></div><div class="lobby-code"><div><b>초대코드</b></div><strong data-code>${r.code}</strong><button class="copy-button" id="copy-code">코드 복사 ⧉</button><span>${r.players.length} / ${r.size * 2}명</span></div>${r.phase === "ordering" ? '<div class="order-clock"><span>출전 순서 확정까지</span><b id="order-time">30</b><small>초 후 자동으로 경기가 시작됩니다.</small></div>' : ""}<div class="teams">${[
-      0, 1,
-    ]
-      .map(
-        (team) =>
-          `<section class="team-column team-${team}"><div class="team-heading"><h2>${r.mode === "duel" ? (team === 0 ? "레드 코너" : "블루 코너") : team === 0 ? "레드 팀" : "블루 팀"}</h2><span>${r.size} PLAYER${r.size > 1 ? "S" : ""}</span></div>${(r.phase ===
-          "ordering"
-            ? r.orders[team].map((id) => r.players.find((p) => p.id === id)!)
-            : r.players.filter((p) => p.team === team)
-          )
-            .map((p, index) => {
-              const c = CHARACTERS.find((c) => c.id === p.character)!;
-              return `<div class="player-row"><span class="player-number">0${index + 1}</span><img src="${portrait(p.character)}" alt="${c.name}"/><div><b>${esc(p.name)} ${p.id === r.host ? "<small>방장</small>" : ""}${p.id === r.captains[team] ? '<small class="captain">팀장</small>' : ""}${p.id === myId ? "<small>나</small>" : ""}</b><span>${c.name} · ${c.trait}</span></div>${r.phase === "ordering" && r.captains[team] === myId ? `<button data-up="${p.id}" aria-label="${esc(p.name)} 출전 순서 올리기" ${index === 0 ? "disabled" : ""}>↑</button>` : `<span class="ready-state ${p.ready ? "is-ready" : ""}">${!p.connected ? "재접속 중" : p.ready ? "READY ✓" : "준비 중"}</span>`}</div>`;
-            })
-            .join(
-              "",
-            )}${Array.from({ length: r.size - r.players.filter((p) => p.team === team).length }, () => '<div class="empty-player"><span>＋</span>참가 대기</div>').join("")}${r.phase === "lobby" && r.mode === "team" && me.team !== team ? `<button class="switch-team" data-team="${team}">이 팀으로 이동 ↗</button>` : ""}</section>`,
-      )
-      .join(
-        "",
-      )}</div>${r.phase === "lobby" ? `<div class="lobby-actions"><button class="secondary" id="change-character">파이터 변경</button><button class="${me.ready ? "secondary" : "primary"}" id="ready">${me.ready ? "준비 취소" : "준비하기"}</button>${host ? `<button class="primary dark" id="start" aria-label="경기 시작" ${r.players.length !== r.size * 2 || r.players.some((p) => !p.ready || !p.connected) ? "disabled" : ""}>경기 시작 <span>↗</span></button>` : '<span class="waiting-host">방장 시작 대기</span>'}</div><p class="lobby-footnote">${r.mode === "team" ? "같은 순번끼리 대결 · 동률이면 결정전" : "90초 · KO 또는 남은 체력으로 승부"}</p>` : '<p class="lobby-footnote">첫 번째 선수부터 시작 · 대기 선수는 관전</p>'}</section>`;
+  $("#ui").innerHTML = lobbyMarkup(r, myId, portrait);
   $("[data-leave]").onclick = () => void leave();
   $("#copy-code").onclick = async () => {
     try {
@@ -589,13 +625,13 @@ async function prepareOnlineBout(r: PublicRoom) {
   if (preparingSync === epoch) return;
   preparingSync = epoch;
   keys.clear();
-  skillPointer = false;
   input = idleInput();
   const loaded =
     world &&
     (await world.setCharacters(
       r.bout.fighters[0].character,
       r.bout.fighters[1].character,
+      r.sport,
     ));
   if (
     !online ||
@@ -637,20 +673,25 @@ function openCharacterPicker(
 }
 function renderFight(watching = false) {
   $("#ui").innerHTML =
-    `<section id="hud" aria-label="경기 화면"><div class="fight-top"><div class="health-player"><span id="name-0"></span><div class="health-track"><i id="hp-0"></i></div><small id="health-0"></small></div><div class="fight-clock"><small id="round-label">SPARRING</small><b id="clock">90</b><span>RING CLUB</span></div><div class="health-player opponent"><span id="name-1"></span><div class="health-track"><i id="hp-1"></i></div><small id="health-1"></small></div></div><div id="fight-announcement" aria-live="polite"></div><div class="reticle">·</div><div id="impact-fx"><div class="impact-burst"></div><b id="impact-word"></b><span id="combo-word"></span></div><div id="skill-banner"></div><button class="signature-button" id="skill-button"><kbd>Q</kbd><span id="skill-name">SIGNATURE</span><div><i id="skill-meter"></i></div><small id="skill-status">CHARGING</small></button><div class="fight-bottom"><div><small>${watching ? "SPECTATING / FIRST-PERSON" : "YOUR STAMINA"}</small><div class="stamina-track"><i id="stamina"></i></div></div><div class="fight-controls">${keyName("w")}${keyName("a")}${keyName("s")}${keyName("d")} 이동 <span>${keyName("j")} 잽</span> <span>${keyName("k")} 훅</span> <span>${keyName(" ")} 가드</span> <span>${keyName("Shift")} 회피</span></div><button class="fight-leave" id="fight-leave">경기 나가기</button></div>${watching ? '<button id="switch-view" class="view-switch">관전 시점 변경 ⇄</button>' : ""}<div class="touch-controls" aria-label="터치 조작"><div class="touch-move"><button data-key="w" aria-label="앞으로">↑</button><button data-key="a" aria-label="왼쪽">←</button><button data-key="s" aria-label="뒤로">↓</button><button data-key="d" aria-label="오른쪽">→</button></div><div class="touch-actions"><button data-key=" " aria-label="가드">가드</button><button data-key="Shift" aria-label="회피">회피</button><button data-key="j" aria-label="잽">잽</button><button data-key="k" aria-label="훅">훅</button></div></div></section>`;
-  skillPointer = false;
+    activeSport() === "bjj"
+      ? grapplingHudMarkup(watching, keyName)
+      : `<section id="hud" aria-label="경기 화면"><div class="fight-top"><div class="health-player"><span id="name-0"></span><div class="health-track"><i id="hp-0"></i></div><small id="health-0"></small></div><div class="fight-clock"><small id="round-label">SPARRING</small><b id="clock">90</b><span>RING CLUB</span></div><div class="health-player opponent"><span id="name-1"></span><div class="health-track"><i id="hp-1"></i></div><small id="health-1"></small></div></div><div id="fight-announcement" aria-live="polite"></div><div class="reticle">·</div><div id="impact-fx"><div class="impact-burst"></div><b id="impact-word"></b><span id="combo-word"></span></div><div id="skill-banner"></div><button class="signature-button" id="skill-button"><kbd>Q</kbd><span id="skill-name">SIGNATURE</span><div><i id="skill-meter"></i></div><small id="skill-status">CHARGING</small></button><div class="fight-bottom"><div><small>${watching ? "SPECTATING / FIRST-PERSON" : "YOUR STAMINA"}</small><div class="stamina-track"><i id="stamina"></i></div></div><div class="fight-controls">${keyName("w")}${keyName("a")}${keyName("s")}${keyName("d")} 이동 <span>${keyName("j")} 잽</span> <span>${keyName("k")} 훅</span> <span>${keyName(" ")} 가드</span> <span>${keyName("Shift")} 회피</span></div><button class="fight-leave" id="fight-leave">경기 나가기</button></div>${watching ? '<button id="switch-view" class="view-switch">관전 시점 변경 ⇄</button>' : ""}<div class="touch-controls" aria-label="터치 조작"><div class="touch-move"><button data-key="w" aria-label="앞으로">↑</button><button data-key="a" aria-label="왼쪽">←</button><button data-key="s" aria-label="뒤로">↓</button><button data-key="d" aria-label="오른쪽">→</button></div><div class="touch-actions"><button data-key=" " aria-label="가드">가드</button><button data-key="Shift" aria-label="회피">회피</button><button data-key="j" aria-label="잽">잽</button><button data-key="k" aria-label="훅">훅</button></div></div></section>`;
+  $("#hud").dataset.sport = activeSport();
+  const cameraButton = $("#bjj-camera");
+  if (cameraButton) cameraButton.onclick = toggleBjjCamera;
+  keys.clear();
   const skillButton = $("#skill-button");
   skillButton.hidden = watching;
   skillButton.onpointerdown = (e) => {
     e.preventDefault();
-    skillPointer = true;
+    keys.pressPointer(e.pointerId, "q");
     skillButton.setPointerCapture(e.pointerId);
   };
   skillButton.onpointerup =
     skillButton.onpointercancel =
     skillButton.onlostpointercapture =
-      () => {
-        skillPointer = false;
+      (e) => {
+        keys.releasePointer(e.pointerId);
       };
   $("#fight-leave").onclick = () => void leave();
   if (watching)
@@ -661,9 +702,12 @@ function renderFight(watching = false) {
     b.onpointerdown = (e) => {
       e.preventDefault();
       b.setPointerCapture(e.pointerId);
-      keys.add(b.dataset.key!);
+      keys.pressPointer(e.pointerId, b.dataset.key!);
     };
-    b.onpointerup = b.onpointercancel = () => keys.delete(b.dataset.key!);
+    b.onpointerup =
+      b.onpointercancel =
+      b.onlostpointercapture =
+        (e) => keys.releasePointer(e.pointerId);
   });
 }
 let lastSkills = [0, 0];
@@ -681,6 +725,7 @@ function updateHud() {
         room.players.some((p) => !p.connected)),
   );
   updateMatchTension($("#hud"), arena, settings.shake);
+  if (b.sport === "bjj") updateGrapplingHud(b, view, bjjCamera);
   const own = b.fighters[view],
     other = b.fighters[1 - view];
   for (const [i, f] of [own, other].entries()) {
@@ -688,9 +733,12 @@ function updateHud() {
     const c = CHARACTERS.find((c) => c.id === f.character)!;
     $(`#name-${i}`).textContent =
       `${p?.name || (f.id === "AI" ? "AI " + ["루키", "클럽", "프로"][difficulty < 0.4 ? 0 : difficulty < 0.8 ? 1 : 2] : localStorage.getItem("ring-name") || "나")} / ${c.name}`;
-    $(`#hp-${i}`).style.width = f.hp + "%";
-    $(`#health-${i}`).textContent = Math.ceil(f.hp) + " HP";
-    if (f.hp < lastHp[i]) {
+    $(`#hp-${i}`).style.width = (b.sport === "bjj" ? f.stamina : f.hp) + "%";
+    $(`#health-${i}`).textContent =
+      b.sport === "bjj"
+        ? `${b.grappling!.points[i === 0 ? view : 1 - view]} PT`
+        : Math.ceil(f.hp) + " HP";
+    if (b.sport !== "bjj" && f.hp < lastHp[i]) {
       world?.impact(i === 0 ? 1 : 0.65);
       if (i === 1) {
         const heavy = own.kind !== "jab";
@@ -711,13 +759,14 @@ function updateHud() {
     lastHp[i] = f.hp;
   }
   $("#skill-meter").style.width = own.meter + "%";
-  $("#skill-name").textContent = signatures[own.character].name;
+  const skillSet = b.sport === "bjj" ? bjjSignatures : signatures;
+  $("#skill-name").textContent = skillSet[own.character].name;
   $("#skill-status").textContent =
     own.meter >= 100 ? "발동 가능" : Math.floor(own.meter) + " / 100";
   $("#skill-button").classList.toggle("charged", own.meter >= 100);
   [own, other].forEach((f, i) => {
     if (f.skillSerial > lastSkills[i]) {
-      const sig = signatures[f.character];
+      const sig = skillSet[f.character];
       $("#skill-banner").innerHTML =
         `<small>${i === 0 ? "내 스킬" : "상대 스킬"}</small><b>${sig.name}</b>`;
       $("#skill-banner").classList.remove("active");
@@ -763,9 +812,9 @@ function renderResult(r: PublicRoom) {
 function renderPracticeResult(b: Bout) {
   gameAudio.setScene("result");
   document.body.classList.remove("fighting");
-  world?.menu();
+  world?.menu(b.sport);
   $("#ui").innerHTML =
-    `<section class="result"><p class="eyebrow">TRAINING COMPLETE</p><h1>${b.winner === 0 ? "NICE ROUND." : b.winner === null ? "EVEN MATCH." : "ONE MORE ROUND?"}</h1><p>${b.reason} · ${b.winner === 0 ? "스파링 승리" : b.winner === null ? "무승부" : "다음에는 더 잘할 수 있어요."}</p><div class="training-stats"><div><b>${b.fighters[0].hits}</b><span>유효 타격</span></div><div><b>${Math.ceil(b.fighters[0].hp)}</b><span>남은 체력</span></div><div><b>${Math.ceil(90 - b.time)}s</b><span>경기 시간</span></div></div><div class="result-buttons"><button class="primary" id="practice-again">다시 연습 ↗</button><button class="secondary" id="practice-home">메인으로</button></div></section>`;
+    `<section class="result"><p class="eyebrow">TRAINING COMPLETE</p><h1>${b.winner === 0 ? "NICE ROUND." : b.winner === null ? "EVEN MATCH." : "ONE MORE ROUND?"}</h1><p>${b.reason} · ${b.winner === 0 ? "스파링 승리" : b.winner === null ? "무승부" : "다음에는 더 잘할 수 있어요."}</p><div class="training-stats"><div><b>${b.sport === "bjj" ? b.grappling!.points[0] : b.fighters[0].hits}</b><span>${b.sport === "bjj" ? "획득 포인트" : "유효 타격"}</span></div><div><b>${Math.ceil(b.sport === "bjj" ? b.fighters[0].stamina : b.fighters[0].hp)}</b><span>${b.sport === "bjj" ? "스태미나" : "남은 체력"}</span></div><div><b>${Math.ceil(90 - b.time)}s</b><span>경기 시간</span></div></div><div class="result-buttons"><button class="primary" id="practice-again">다시 연습 ↗</button><button class="secondary" id="practice-home">메인으로</button></div></section>`;
   $("#practice-again").onclick = () => {
     practiceResult = false;
     startPractice();
@@ -777,7 +826,6 @@ function renderPracticeResult(b: Bout) {
 }
 async function leave() {
   keys.clear();
-  skillPointer = false;
   input = idleInput();
   if (room) {
     if (!online) {
@@ -794,20 +842,29 @@ async function leave() {
   renderHome();
 }
 function help() {
+  const bjj = activeSport() === "bjj";
+  const controls = bjj
+    ? [
+        ["W A S D", "이동 · 그라운드 체중 이동"],
+        ["J / 좌클릭", "그립 · 프레임 · 포지션 전진"],
+        ["K / 우클릭", "테이크다운 · 스윕 · 서브미션"],
+        ["SPACE", "상대 진입과 서브미션 방어"],
+        ["SHIFT", "스프롤 · 포지션 탈출"],
+        ["Q", "게이지 100에서 캐릭터 스타일"],
+        ["V", "1인칭 / 중계 시점 전환"],
+        ["ESC", "입력 해제 · 도움말 닫기"],
+      ]
+    : [
+        ["W A S D", "전후 이동 · 좌우 스텝"],
+        ["J / 좌클릭", "빠르고 긴 잽"],
+        ["K / 우클릭", "짧고 강한 훅"],
+        ["Q", "게이지 100에서 시그니처 스킬"],
+        ["SPACE", "가드 · 피해 75% 감소"],
+        ["SHIFT", "스태미나를 쓰는 순간 회피"],
+        ["ESC", "입력 해제 · 도움말 닫기"],
+      ];
   modal(
-    `<p class="eyebrow">LEARN THE RHYTHM</p><h2 id="dialog-title">먼저 거리부터.</h2><p class="dialog-description">상대를 자동으로 바라보는 1인칭 복싱입니다.<br>잽으로 거리를 재고, 가드가 풀리는 순간 훅을 넣으세요.</p><div class="guide-grid">${[
-      ["W A S D", "전후 이동 · 좌우 스텝"],
-      ["J / 좌클릭", "빠르고 긴 잽"],
-      ["K / 우클릭", "짧고 강한 훅"],
-      ["Q", "게이지 100에서 시그니처 스킬"],
-      ["SPACE", "가드 · 피해 75% 감소"],
-      ["SHIFT", "스태미나를 쓰는 순간 회피"],
-      ["ESC", "입력 해제 · 도움말 닫기"],
-    ]
-      .map(([k, v]) => `<div><kbd>${k}</kbd><span>${v}</span></div>`)
-      .join(
-        "",
-      )}</div><p class="form-note">가드 중에는 공격할 수 없습니다. 훅과 회피는 스태미나를 많이 소모합니다.<br>90초 안에 KO하거나, 시간이 끝났을 때 더 많은 체력을 남기세요.<br>모바일에서는 화면 하단 터치 버튼을 사용하세요.</p>`,
+    `<h2 id="dialog-title">${bjj ? "주짓수" : "복싱"} 조작</h2><p class="dialog-description">${bjj ? "가까이서 J로 그립을 만들고 K로 테이크다운하세요. 그라운드에서는 현재 포지션에 맞게 버튼이 바뀝니다." : "잽으로 거리를 재고, 가드가 풀리는 순간 훅을 넣으세요."}</p><div class="guide-grid">${controls.map(([key, label]) => `<div><kbd>${key}</kbd><span>${label}</span></div>`).join("")}</div><p class="form-note">${bjj ? "테이크다운 2점 · 패스 3점 · 마운트/백 4점 · 스윕 2점. 탭을 받거나 90초 뒤 포인트로 승부합니다." : "가드 중에는 공격할 수 없습니다. 90초 안에 KO하거나 더 많은 체력을 남기세요."}<br>모바일에서는 하단 터치 버튼을 사용하세요.</p>`,
     "help",
   );
 }
@@ -818,10 +875,10 @@ function openSettings() {
       ["s", "뒤로"],
       ["a", "왼쪽"],
       ["d", "오른쪽"],
-      ["j", "잽"],
-      ["k", "훅"],
-      [" ", "가드"],
-      ["Shift", "회피"],
+      ["j", activeSport() === "bjj" ? "그립 / 프레임" : "잽"],
+      ["k", activeSport() === "bjj" ? "테이크다운 / 기술" : "훅"],
+      [" ", "방어"],
+      ["Shift", "회피 / 탈출"],
     ]
       .map(
         ([key, name]) =>
@@ -867,8 +924,7 @@ function openSettings() {
     localStorage.setItem("ring-shake", settings.shake ? "on" : "off");
   };
 }
-let skillPointer = false;
-const keys = new Set<string>();
+const keys = new HeldControls();
 const gameplayKeys = ["w", "a", "s", "d", "j", "k", "q", " ", "Shift"];
 addEventListener("keydown", (e) => {
   const physical = e.key.length === 1 ? e.key.toLowerCase() : e.key;
@@ -892,7 +948,6 @@ addEventListener("keydown", (e) => {
   const mapped = Object.keys(bindings).find((k) => bindings[k] === physical);
   if (e.key === "Escape") {
     keys.clear();
-    skillPointer = false;
     if (dialog) closeModal();
     return;
   }
@@ -913,25 +968,26 @@ addEventListener("keyup", (e) => {
 });
 addEventListener("blur", () => {
   keys.clear();
-  skillPointer = false;
   input = idleInput();
 });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     keys.clear();
-    skillPointer = false;
     input = idleInput();
   }
 });
 $("#world").addEventListener("pointerdown", (e) => {
   if (!(local || room?.phase === "playing") || dialog) return;
-  if (e.button === 0) keys.add("j");
-  if (e.button === 2) keys.add("k");
+  if (e.button === 0) keys.pressPointer(e.pointerId, "j");
+  if (e.button === 2) keys.pressPointer(e.pointerId, "k");
 });
-addEventListener("pointerup", () => {
-  keys.delete("j");
-  keys.delete("k");
+addEventListener("pointerup", (e) => {
+  if (e.pointerType === "mouse" && e.buttons) {
+    if (!(e.buttons & 1)) keys.releasePointer(e.pointerId, "j");
+    if (!(e.buttons & 2)) keys.releasePointer(e.pointerId, "k");
+  } else keys.releasePointer(e.pointerId);
 });
+addEventListener("pointercancel", (e) => keys.releasePointer(e.pointerId));
 $("#world").addEventListener("contextmenu", (e) => {
   if (local || room?.phase === "playing") e.preventDefault();
 });
@@ -960,7 +1016,7 @@ $("[data-home]").onclick = () => {
 };
 $("[data-roster]").onclick = () => {
   if (room) openCharacterPicker();
-  else if (!local) $("#roster").scrollIntoView({ behavior: "smooth" });
+  else if (!local) openCharacterPicker();
 };
 $("[data-help]").onclick = help;
 $("[data-settings]").onclick = openSettings;
@@ -975,7 +1031,7 @@ setInterval(() => {
     input = {
       forward: Number(keys.has("w")) - Number(keys.has("s")),
       strafe: Number(keys.has("d")) - Number(keys.has("a")),
-      skill: keys.has("q") || skillPointer,
+      skill: keys.has("q"),
       jab: keys.has("j"),
       hook: keys.has("k"),
       guard: keys.has(" "),
@@ -1054,4 +1110,24 @@ addEventListener("fighter-assets-ready", () => {
     !local
   )
     renderHome();
+});
+
+function toggleBjjCamera() {
+  bjjCamera = bjjCamera === "first" ? "broadcast" : "first";
+  localStorage.setItem("ring-bjj-camera", bjjCamera);
+  if (world) world.bjjCamera = bjjCamera;
+  const b = local || room?.bout;
+  if (b?.sport === "bjj") updateGrapplingHud(b, view, bjjCamera);
+}
+addEventListener("keydown", (event) => {
+  if (
+    event.code === "KeyV" &&
+    !event.repeat &&
+    !dialog &&
+    document.body.classList.contains("fighting") &&
+    activeSport() === "bjj"
+  ) {
+    event.preventDefault();
+    toggleBjjCamera();
+  }
 });

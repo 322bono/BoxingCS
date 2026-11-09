@@ -19,7 +19,12 @@ export function matchTension(bout: Bout, view: number, paused = false) {
     urgency: (active ? (bout.time <= 10 ? 2 : bout.time <= 30 ? 1 : 0) : 0) as
       0 | 1 | 2,
     danger: active
-      ? clamp((30 - bout.fighters[view === 1 ? 1 : 0].hp) / 30)
+      ? bout.sport === "bjj"
+        ? bout.grappling?.submission &&
+          bout.grappling.submission.attacker !== view
+          ? clamp((bout.grappling.submission.progress - 20) / 70)
+          : 0
+        : clamp((30 - bout.fighters[view === 1 ? 1 : 0].hp) / 30)
       : 0,
   };
 }
@@ -54,6 +59,7 @@ export class MatchAtmosphereTracker {
     const before = this.previous;
     this.previous = {
       ...bout,
+      grappling: bout.grappling ? { ...bout.grappling } : undefined,
       fighters: bout.fighters.map((f) => ({ ...f })) as Bout["fighters"],
     };
     this.key = key;
@@ -80,15 +86,34 @@ export class MatchAtmosphereTracker {
     const skill = bout.fighters.some(
       (f, i) => f.skillSerial > before.fighters[i].skillSerial,
     );
+    const grapple =
+      bout.grappling &&
+      before.grappling &&
+      bout.grappling.actionSerial > before.grappling.actionSerial
+        ? bout.grappling.lastAction
+        : null;
+    const bigGrapple =
+      !!grapple &&
+      ["takedown", "sweep", "mount", "back", "submission"].includes(grapple);
+    const smallGrapple =
+      !!grapple &&
+      ["pass", "escape", "sprawl", "submission-escape"].includes(grapple);
     this.excitement = clamp(
-      this.excitement + damage / 48 + (skill ? 0.25 : 0),
+      this.excitement +
+        damage / 48 +
+        (skill ? 0.25 : 0) +
+        (bigGrapple ? 0.18 : smallGrapple ? 0.1 : 0),
       0,
       0.7,
     );
     frame.energy = clamp(base + this.excitement);
     frame.warning = before.time > 10 && bout.time <= 10;
     const candidate =
-      skill || damage >= 14 || combo ? "roar" : damage >= 5 ? "cheer" : null;
+      skill || damage >= 14 || combo || bigGrapple
+        ? "roar"
+        : damage >= 5 || smallGrapple
+          ? "cheer"
+          : null;
     if (
       candidate &&
       (this.cooldown === 0 ||

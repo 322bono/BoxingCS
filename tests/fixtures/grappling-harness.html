@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#182727}canvas{display:block}</style></head>
+<body><script type="module">
+  import * as THREE from "/node_modules/three/build/three.module.js";
+  import {FighterLibrary} from "/src/assets/library.ts";
+  import {GrapplingPresentation} from "/src/grappling-world.ts";
+  import {createBout} from "/shared/game.ts";
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(1);renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
+  document.body.append(renderer.domElement);
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#182727');
+  scene.add(new THREE.HemisphereLight('#efffff','#334442',3));
+  const light=new THREE.DirectionalLight('#fff1dd',4);light.position.set(2,5,4);scene.add(light);
+  const floor=new THREE.Mesh(new THREE.BoxGeometry(7,.20,7),new THREE.MeshStandardMaterial({color:'#658b80',roughness:.94}));floor.position.y=.04;scene.add(floor);
+  const grid=new THREE.GridHelper(7,7,'#355d52','#4e766a');grid.position.y=.145;scene.add(grid);
+  const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.04,50);scene.add(camera);
+  const presentation=new GrapplingPresentation(camera);camera.add(presentation.root);
+  const library=new FighterLibrary();
+  const models=await Promise.all([library.instantiate('nova',0,'bjj'),library.instantiate('blaze',1,'bjj')]);
+  if(models.some(model=>!model))throw Error('Real rigs unavailable');
+  scene.add(...models);
+  const bout=createBout(['a','b'],['nova','blaze'],'bjj');bout.countdown=0;
+  const pose=(position='guard',top=1,mode='broadcast',view=0,submission=null,transition=null)=>{
+    bout.grappling.position=position;bout.grappling.top=top;bout.grappling.submission=submission;bout.grappling.transition=transition;
+    presentation.update(bout,models,view,1/30,true,mode);renderer.render(scene,camera);
+    return {camera:camera.position.toArray(),bounds:models.map(root=>{root.traverse(object=>{if(object.isSkinnedMesh)object.computeBoundingBox()});const b=new THREE.Box3().setFromObject(root);return {min:b.min.toArray(),max:b.max.toArray()}}),draws:renderer.info.render.calls};
+  };
+  const settle=(...args)=>{presentation.reset();return pose(...args)};
+  settle();window.grapplingHarness={bout,models,presentation,renderer,scene,camera,pose,settle};
+</script></body></html>
